@@ -1,0 +1,1200 @@
+[
+    {
+        "item_id": "100",
+        "start_price_in_cents": 7000,
+        "start_time": "2021-12-01 15:00:00.000000",
+        "end_time": "2021-12-01 17:00:00.000000",
+        "cancellation_time": "",
+        "finalized_time": "2022-12-01 17:00:55.000000",
+        "bids": [
+            {
+                "bid_id": "10",
+                "item_id": "100",
+                "bidder_user_id": "418",
+                "amount_in_cents": 7000,
+                "time_received": "2021-12-01 15:00:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "11",
+                "item_id": "100",
+                "bidder_user_id": "434",
+                "amount_in_cents": 7198,
+                "time_received": "2021-12-01 15:02:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "12",
+                "item_id": "100",
+                "bidder_user_id": "497",
+                "amount_in_cents": 8167,
+                "time_received": "2021-12-01 15:05:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "13",
+                "item_id": "100",
+                "bidder_user_id": "458",
+                "amount_in_cents": 8271,
+                "time_received": "2021-12-01 15:08:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "14",
+                "item_id": "100",
+                "bidder_user_id": "411",
+                "amount_in_cents": 8530,
+                "time_received": "2021-12-01 15:10:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "15",
+                "item_id": "100",
+                "bidder_user_id": "476",
+                "amount_in_cents": 9412,
+                "time_received": "2021-12-01 15:11:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "16",
+                "item_id": "100",
+                "bidder_user_id": "500",
+                "amount_in_cents": 10389,
+                "time_received": "2021-12-01 15:13:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "17",
+                "item_id": "100",
+                "bidder_user_id": "439",
+                "amount_in_cents": 10751,
+                "time_received": "2021-12-01 15:15:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "18",
+                "item_id": "100",
+                "bidder_user_id": "489",
+                "amount_in_cents": 10884,
+                "time_received": "2021-12-01 15:18:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "19",
+                "item_id": "100",
+                "bidder_user_id": "429",
+                "amount_in_cents": 11485,
+                "time_received": "2021-12-01 15:20:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "20",
+                "item_id": "100",
+                "bidder_user_id": "421",
+                "amount_in_cents": 11875,
+                "time_received": "2021-12-01 15:23:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "21",
+                "item_id": "100",
+                "bidder_user_id": "476",
+                "amount_in_cents": 12644,
+                "time_received": "2021-12-01 15:24:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "22",
+                "item_id": "100",
+                "bidder_user_id": "442",
+                "amount_in_cents": 13110,
+                "time_received": "2021-12-01 15:25:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "23",
+                "item_id": "100",
+                "bidder_user_id": "400",
+                "amount_in_cents": 14057,
+                "time_received": "2021-12-01 15:26:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "24",
+                "item_id": "100",
+                "bidder_user_id": "442",
+                "amount_in_cents": 14370,
+                "time_received": "2021-12-01 15:30:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "25",
+                "item_id": "100",
+                "bidder_user_id": "430",
+                "amount_in_cents": 15272,
+                "time_received": "2021-12-01 15:31:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "26",
+                "item_id": "100",
+                "bidder_user_id": "471",
+                "amount_in_cents": 15477,
+                "time_received": "2021-12-01 15:35:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "27",
+                "item_id": "100",
+                "bidder_user_id": "429",
+                "amount_in_cents": 16097,
+                "time_received": "2021-12-01 15:38:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "28",
+                "item_id": "100",
+                "bidder_user_id": "496",
+                "amount_in_cents": 16919,
+                "time_received": "2021-12-01 15:40:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "29",
+                "item_id": "100",
+                "bidder_user_id": "415",
+                "amount_in_cents": 17587,
+                "time_received": "2021-12-01 15:42:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "30",
+                "item_id": "100",
+                "bidder_user_id": "431",
+                "amount_in_cents": 17900,
+                "time_received": "2021-12-01 15:46:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "31",
+                "item_id": "100",
+                "bidder_user_id": "476",
+                "amount_in_cents": 18300,
+                "time_received": "2021-12-01 15:50:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "32",
+                "item_id": "100",
+                "bidder_user_id": "414",
+                "amount_in_cents": 19202,
+                "time_received": "2021-12-01 15:55:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "33",
+                "item_id": "100",
+                "bidder_user_id": "442",
+                "amount_in_cents": 19727,
+                "time_received": "2021-12-01 15:59:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "34",
+                "item_id": "100",
+                "bidder_user_id": "498",
+                "amount_in_cents": 20631,
+                "time_received": "2021-12-01 16:00:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "35",
+                "item_id": "100",
+                "bidder_user_id": "421",
+                "amount_in_cents": 20896,
+                "time_received": "2021-12-01 16:01:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "36",
+                "item_id": "100",
+                "bidder_user_id": "419",
+                "amount_in_cents": 21264,
+                "time_received": "2021-12-01 16:02:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "37",
+                "item_id": "100",
+                "bidder_user_id": "442",
+                "amount_in_cents": 22070,
+                "time_received": "2021-12-01 16:03:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "38",
+                "item_id": "100",
+                "bidder_user_id": "434",
+                "amount_in_cents": 22588,
+                "time_received": "2021-12-01 16:04:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "39",
+                "item_id": "100",
+                "bidder_user_id": "498",
+                "amount_in_cents": 23577,
+                "time_received": "2021-12-01 16:05:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "40",
+                "item_id": "100",
+                "bidder_user_id": "481",
+                "amount_in_cents": 24056,
+                "time_received": "2021-12-01 16:06:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "41",
+                "item_id": "100",
+                "bidder_user_id": "407",
+                "amount_in_cents": 24362,
+                "time_received": "2021-12-01 16:08:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "42",
+                "item_id": "100",
+                "bidder_user_id": "458",
+                "amount_in_cents": 24761,
+                "time_received": "2021-12-01 16:10:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "43",
+                "item_id": "100",
+                "bidder_user_id": "407",
+                "amount_in_cents": 25123,
+                "time_received": "2021-12-01 16:12:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "44",
+                "item_id": "100",
+                "bidder_user_id": "422",
+                "amount_in_cents": 25398,
+                "time_received": "2021-12-01 16:14:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "45",
+                "item_id": "100",
+                "bidder_user_id": "440",
+                "amount_in_cents": 25610,
+                "time_received": "2021-12-01 16:16:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "46",
+                "item_id": "100",
+                "bidder_user_id": "439",
+                "amount_in_cents": 26328,
+                "time_received": "2021-12-01 16:20:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "47",
+                "item_id": "100",
+                "bidder_user_id": "464",
+                "amount_in_cents": 27150,
+                "time_received": "2021-12-01 16:21:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "48",
+                "item_id": "100",
+                "bidder_user_id": "435",
+                "amount_in_cents": 27655,
+                "time_received": "2021-12-01 16:22:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "49",
+                "item_id": "100",
+                "bidder_user_id": "490",
+                "amount_in_cents": 28155,
+                "time_received": "2021-12-01 16:24:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "50",
+                "item_id": "100",
+                "bidder_user_id": "446",
+                "amount_in_cents": 29095,
+                "time_received": "2021-12-01 16:25:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "51",
+                "item_id": "100",
+                "bidder_user_id": "446",
+                "amount_in_cents": 29449,
+                "time_received": "2021-12-01 16:27:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "52",
+                "item_id": "100",
+                "bidder_user_id": "439",
+                "amount_in_cents": 30150,
+                "time_received": "2021-12-01 16:29:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "53",
+                "item_id": "100",
+                "bidder_user_id": "436",
+                "amount_in_cents": 31084,
+                "time_received": "2021-12-01 16:30:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "54",
+                "item_id": "100",
+                "bidder_user_id": "498",
+                "amount_in_cents": 31731,
+                "time_received": "2021-12-01 16:33:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "55",
+                "item_id": "100",
+                "bidder_user_id": "420",
+                "amount_in_cents": 32364,
+                "time_received": "2021-12-01 16:35:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "56",
+                "item_id": "100",
+                "bidder_user_id": "472",
+                "amount_in_cents": 32876,
+                "time_received": "2021-12-01 16:37:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "57",
+                "item_id": "100",
+                "bidder_user_id": "433",
+                "amount_in_cents": 32976,
+                "time_received": "2021-12-01 16:39:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "58",
+                "item_id": "100",
+                "bidder_user_id": "482",
+                "amount_in_cents": 33076,
+                "time_received": "2021-12-01 16:40:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "59",
+                "item_id": "100",
+                "bidder_user_id": "475",
+                "amount_in_cents": 33176,
+                "time_received": "2021-12-01 16:40:10.000000",
+                "active": true
+            },
+            {
+                "bid_id": "60",
+                "item_id": "100",
+                "bidder_user_id": "459",
+                "amount_in_cents": 33276,
+                "time_received": "2021-12-01 16:41:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "61",
+                "item_id": "100",
+                "bidder_user_id": "487",
+                "amount_in_cents": 33376,
+                "time_received": "2021-12-01 16:42:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "62",
+                "item_id": "100",
+                "bidder_user_id": "432",
+                "amount_in_cents": 33476,
+                "time_received": "2021-12-01 16:43:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "63",
+                "item_id": "100",
+                "bidder_user_id": "484",
+                "amount_in_cents": 33576,
+                "time_received": "2021-12-01 16:44:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "64",
+                "item_id": "100",
+                "bidder_user_id": "473",
+                "amount_in_cents": 33676,
+                "time_received": "2021-12-01 16:45:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "65",
+                "item_id": "100",
+                "bidder_user_id": "478",
+                "amount_in_cents": 33776,
+                "time_received": "2021-12-01 16:46:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "66",
+                "item_id": "100",
+                "bidder_user_id": "469",
+                "amount_in_cents": 33876,
+                "time_received": "2021-12-01 16:48:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "67",
+                "item_id": "100",
+                "bidder_user_id": "424",
+                "amount_in_cents": 33976,
+                "time_received": "2021-12-01 16:50:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "68",
+                "item_id": "100",
+                "bidder_user_id": "456",
+                "amount_in_cents": 34076,
+                "time_received": "2021-12-01 16:51:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "69",
+                "item_id": "100",
+                "bidder_user_id": "443",
+                "amount_in_cents": 34176,
+                "time_received": "2021-12-01 16:52:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "70",
+                "item_id": "100",
+                "bidder_user_id": "486",
+                "amount_in_cents": 34276,
+                "time_received": "2021-12-01 16:53:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "71",
+                "item_id": "100",
+                "bidder_user_id": "435",
+                "amount_in_cents": 34376,
+                "time_received": "2021-12-01 16:54:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "72",
+                "item_id": "100",
+                "bidder_user_id": "456",
+                "amount_in_cents": 34476,
+                "time_received": "2021-12-01 16:55:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "73",
+                "item_id": "100",
+                "bidder_user_id": "497",
+                "amount_in_cents": 34576,
+                "time_received": "2021-12-01 16:56:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "74",
+                "item_id": "100",
+                "bidder_user_id": "449",
+                "amount_in_cents": 34676,
+                "time_received": "2021-12-01 16:57:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "75",
+                "item_id": "100",
+                "bidder_user_id": "423",
+                "amount_in_cents": 34776,
+                "time_received": "2021-12-01 16:57:10.000000",
+                "active": true
+            },
+            {
+                "bid_id": "76",
+                "item_id": "100",
+                "bidder_user_id": "500",
+                "amount_in_cents": 34876,
+                "time_received": "2021-12-01 16:57:13.000000",
+                "active": true
+            },
+            {
+                "bid_id": "77",
+                "item_id": "100",
+                "bidder_user_id": "437",
+                "amount_in_cents": 34976,
+                "time_received": "2021-12-01 16:57:15.000000",
+                "active": true
+            },
+            {
+                "bid_id": "78",
+                "item_id": "100",
+                "bidder_user_id": "400",
+                "amount_in_cents": 35076,
+                "time_received": "2021-12-01 16:57:17.000000",
+                "active": true
+            },
+            {
+                "bid_id": "79",
+                "item_id": "100",
+                "bidder_user_id": "406",
+                "amount_in_cents": 35176,
+                "time_received": "2021-12-01 16:57:19.000000",
+                "active": true
+            },
+            {
+                "bid_id": "80",
+                "item_id": "100",
+                "bidder_user_id": "446",
+                "amount_in_cents": 35276,
+                "time_received": "2021-12-01 16:57:21.000000",
+                "active": true
+            },
+            {
+                "bid_id": "81",
+                "item_id": "100",
+                "bidder_user_id": "469",
+                "amount_in_cents": 35376,
+                "time_received": "2021-12-01 16:57:25.000000",
+                "active": true
+            },
+            {
+                "bid_id": "82",
+                "item_id": "100",
+                "bidder_user_id": "442",
+                "amount_in_cents": 35476,
+                "time_received": "2021-12-01 16:57:28.000000",
+                "active": true
+            },
+            {
+                "bid_id": "83",
+                "item_id": "100",
+                "bidder_user_id": "473",
+                "amount_in_cents": 35666,
+                "time_received": "2021-12-01 16:57:30.000000",
+                "active": true
+            },
+            {
+                "bid_id": "84",
+                "item_id": "100",
+                "bidder_user_id": "442",
+                "amount_in_cents": 35781,
+                "time_received": "2021-12-01 16:57:40.000000",
+                "active": true
+            },
+            {
+                "bid_id": "85",
+                "item_id": "100",
+                "bidder_user_id": "461",
+                "amount_in_cents": 35929,
+                "time_received": "2021-12-01 16:58:00.000000",
+                "active": true
+            },
+            {
+                "bid_id": "86",
+                "item_id": "100",
+                "bidder_user_id": "424",
+                "amount_in_cents": 36104,
+                "time_received": "2021-12-01 16:58:02.000000",
+                "active": true
+            },
+            {
+                "bid_id": "87",
+                "item_id": "100",
+                "bidder_user_id": "468",
+                "amount_in_cents": 36266,
+                "time_received": "2021-12-01 16:58:05.000000",
+                "active": true
+            },
+            {
+                "bid_id": "88",
+                "item_id": "100",
+                "bidder_user_id": "439",
+                "amount_in_cents": 36422,
+                "time_received": "2021-12-01 16:58:07.000000",
+                "active": true
+            },
+            {
+                "bid_id": "89",
+                "item_id": "100",
+                "bidder_user_id": "457",
+                "amount_in_cents": 36579,
+                "time_received": "2021-12-01 16:58:10.000000",
+                "active": true
+            },
+            {
+                "bid_id": "90",
+                "item_id": "100",
+                "bidder_user_id": "493",
+                "amount_in_cents": 36717,
+                "time_received": "2021-12-01 16:58:13.000000",
+                "active": true
+            },
+            {
+                "bid_id": "91",
+                "item_id": "100",
+                "bidder_user_id": "462",
+                "amount_in_cents": 36867,
+                "time_received": "2021-12-01 16:58:15.000000",
+                "active": true
+            },
+            {
+                "bid_id": "92",
+                "item_id": "100",
+                "bidder_user_id": "495",
+                "amount_in_cents": 36974,
+                "time_received": "2021-12-01 16:58:16.000000",
+                "active": true
+            },
+            {
+                "bid_id": "93",
+                "item_id": "100",
+                "bidder_user_id": "431",
+                "amount_in_cents": 37130,
+                "time_received": "2021-12-01 16:58:20.000000",
+                "active": true
+            },
+            {
+                "bid_id": "94",
+                "item_id": "100",
+                "bidder_user_id": "452",
+                "amount_in_cents": 37288,
+                "time_received": "2021-12-01 16:58:24.000000",
+                "active": true
+            },
+            {
+                "bid_id": "95",
+                "item_id": "100",
+                "bidder_user_id": "416",
+                "amount_in_cents": 37437,
+                "time_received": "2021-12-01 16:58:29.000000",
+                "active": true
+            },
+            {
+                "bid_id": "96",
+                "item_id": "100",
+                "bidder_user_id": "490",
+                "amount_in_cents": 37610,
+                "time_received": "2021-12-01 16:58:32.000000",
+                "active": true
+            },
+            {
+                "bid_id": "97",
+                "item_id": "100",
+                "bidder_user_id": "432",
+                "amount_in_cents": 37775,
+                "time_received": "2021-12-01 16:58:40.000000",
+                "active": true
+            },
+            {
+                "bid_id": "98",
+                "item_id": "100",
+                "bidder_user_id": "475",
+                "amount_in_cents": 37904,
+                "time_received": "2021-12-01 16:58:48.000000",
+                "active": true
+            },
+            {
+                "bid_id": "99",
+                "item_id": "100",
+                "bidder_user_id": "497",
+                "amount_in_cents": 38063,
+                "time_received": "2021-12-01 16:59:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "100",
+                "item_id": "100",
+                "bidder_user_id": "402",
+                "amount_in_cents": 38197,
+                "time_received": "2021-12-01 16:59:03.000000",
+                "active": true
+            },
+            {
+                "bid_id": "101",
+                "item_id": "100",
+                "bidder_user_id": "470",
+                "amount_in_cents": 38326,
+                "time_received": "2021-12-01 16:59:05.000000",
+                "active": true
+            },
+            {
+                "bid_id": "102",
+                "item_id": "100",
+                "bidder_user_id": "430",
+                "amount_in_cents": 38497,
+                "time_received": "2021-12-01 16:59:09.000000",
+                "active": true
+            },
+            {
+                "bid_id": "103",
+                "item_id": "100",
+                "bidder_user_id": "444",
+                "amount_in_cents": 38625,
+                "time_received": "2021-12-01 16:59:10.000000",
+                "active": true
+            },
+            {
+                "bid_id": "104",
+                "item_id": "100",
+                "bidder_user_id": "438",
+                "amount_in_cents": 38734,
+                "time_received": "2021-12-01 16:59:12.000000",
+                "active": true
+            },
+            {
+                "bid_id": "105",
+                "item_id": "100",
+                "bidder_user_id": "427",
+                "amount_in_cents": 38853,
+                "time_received": "2021-12-01 16:59:16.000000",
+                "active": true
+            },
+            {
+                "bid_id": "106",
+                "item_id": "100",
+                "bidder_user_id": "478",
+                "amount_in_cents": 38988,
+                "time_received": "2021-12-01 16:59:18.000000",
+                "active": true
+            },
+            {
+                "bid_id": "107",
+                "item_id": "100",
+                "bidder_user_id": "480",
+                "amount_in_cents": 39148,
+                "time_received": "2021-12-01 16:59:19.000000",
+                "active": true
+            },
+            {
+                "bid_id": "108",
+                "item_id": "100",
+                "bidder_user_id": "491",
+                "amount_in_cents": 39322,
+                "time_received": "2021-12-01 16:59:20.000000",
+                "active": true
+            },
+            {
+                "bid_id": "109",
+                "item_id": "100",
+                "bidder_user_id": "411",
+                "amount_in_cents": 39461,
+                "time_received": "2021-12-01 16:59:21.000000",
+                "active": true
+            },
+            {
+                "bid_id": "110",
+                "item_id": "100",
+                "bidder_user_id": "466",
+                "amount_in_cents": 39602,
+                "time_received": "2021-12-01 16:59:30.000000",
+                "active": true
+            },
+            {
+                "bid_id": "111",
+                "item_id": "100",
+                "bidder_user_id": "426",
+                "amount_in_cents": 39748,
+                "time_received": "2021-12-01 16:59:31.000000",
+                "active": true
+            },
+            {
+                "bid_id": "112",
+                "item_id": "100",
+                "bidder_user_id": "430",
+                "amount_in_cents": 39862,
+                "time_received": "2021-12-01 16:59:58.100000",
+                "active": true
+            },
+            {
+                "bid_id": "113",
+                "item_id": "100",
+                "bidder_user_id": "478",
+                "amount_in_cents": 40033,
+                "time_received": "2021-12-01 16:59:58.120000",
+                "active": true
+            },
+            {
+                "bid_id": "114",
+                "item_id": "100",
+                "bidder_user_id": "453",
+                "amount_in_cents": 40189,
+                "time_received": "2021-12-01 16:59:58.130000",
+                "active": true
+            },
+            {
+                "bid_id": "115",
+                "item_id": "100",
+                "bidder_user_id": "411",
+                "amount_in_cents": 40333,
+                "time_received": "2021-12-01 16:59:58.150000",
+                "active": true
+            },
+            {
+                "bid_id": "116",
+                "item_id": "100",
+                "bidder_user_id": "442",
+                "amount_in_cents": 40453,
+                "time_received": "2021-12-01 16:59:58.200000",
+                "active": true
+            },
+            {
+                "bid_id": "117",
+                "item_id": "100",
+                "bidder_user_id": "409",
+                "amount_in_cents": 40582,
+                "time_received": "2021-12-01 16:59:58.600000",
+                "active": true
+            },
+            {
+                "bid_id": "118",
+                "item_id": "100",
+                "bidder_user_id": "499",
+                "amount_in_cents": 40764,
+                "time_received": "2021-12-01 16:59:59.100000",
+                "active": true
+            },
+            {
+                "bid_id": "119",
+                "item_id": "100",
+                "bidder_user_id": "408",
+                "amount_in_cents": 40951,
+                "time_received": "2021-12-01 16:59:59.400000",
+                "active": true
+            },
+            {
+                "bid_id": "120",
+                "item_id": "100",
+                "bidder_user_id": "499",
+                "amount_in_cents": 41064,
+                "time_received": "2021-12-01 16:59:59.510000",
+                "active": true
+            },
+            {
+                "bid_id": "121",
+                "item_id": "100",
+                "bidder_user_id": "484",
+                "amount_in_cents": 41206,
+                "time_received": "2021-12-01 16:59:59.600000",
+                "active": true
+            },
+            {
+                "bid_id": "122",
+                "item_id": "100",
+                "bidder_user_id": "412",
+                "amount_in_cents": 41369,
+                "time_received": "2021-12-01 16:59:59.988000",
+                "active": true
+            },
+            {
+                "bid_id": "123",
+                "item_id": "100",
+                "bidder_user_id": "405",
+                "amount_in_cents": 41520,
+                "time_received": "2021-12-01 16:59:59.999900",
+                "active": true
+            }
+        ]
+    },
+    {
+        "item_id": "101",
+        "start_price_in_cents": 13000,
+        "start_time": "2021-12-01 17:00:00.000000",
+        "end_time": "2021-12-01 20:00:00.000000",
+        "cancellation_time": "",
+        "finalized_time": "2022-12-01 20:01:03.000000",
+        "bids": [
+            {
+                "bid_id": "124",
+                "item_id": "101",
+                "bidder_user_id": "488",
+                "amount_in_cents": 13000,
+                "time_received": "2021-12-01 19:01:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "125",
+                "item_id": "101",
+                "bidder_user_id": "493",
+                "amount_in_cents": 13649,
+                "time_received": "2021-12-01 19:02:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "126",
+                "item_id": "101",
+                "bidder_user_id": "453",
+                "amount_in_cents": 14246,
+                "time_received": "2021-12-01 19:03:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "127",
+                "item_id": "101",
+                "bidder_user_id": "496",
+                "amount_in_cents": 15037,
+                "time_received": "2021-12-01 19:05:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "128",
+                "item_id": "101",
+                "bidder_user_id": "460",
+                "amount_in_cents": 15758,
+                "time_received": "2021-12-01 19:07:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "129",
+                "item_id": "101",
+                "bidder_user_id": "472",
+                "amount_in_cents": 16196,
+                "time_received": "2021-12-01 19:09:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "130",
+                "item_id": "101",
+                "bidder_user_id": "405",
+                "amount_in_cents": 16577,
+                "time_received": "2021-12-01 19:10:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "131",
+                "item_id": "101",
+                "bidder_user_id": "444",
+                "amount_in_cents": 16691,
+                "time_received": "2021-12-01 19:13:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "132",
+                "item_id": "101",
+                "bidder_user_id": "496",
+                "amount_in_cents": 17242,
+                "time_received": "2021-12-01 19:20:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "133",
+                "item_id": "101",
+                "bidder_user_id": "479",
+                "amount_in_cents": 17961,
+                "time_received": "2021-12-01 19:25:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "134",
+                "item_id": "101",
+                "bidder_user_id": "425",
+                "amount_in_cents": 19409,
+                "time_received": "2021-12-01 19:27:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "135",
+                "item_id": "101",
+                "bidder_user_id": "447",
+                "amount_in_cents": 20873,
+                "time_received": "2021-12-01 19:29:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "136",
+                "item_id": "101",
+                "bidder_user_id": "470",
+                "amount_in_cents": 22083,
+                "time_received": "2021-12-01 19:31:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "137",
+                "item_id": "101",
+                "bidder_user_id": "421",
+                "amount_in_cents": 23478,
+                "time_received": "2021-12-01 19:40:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "138",
+                "item_id": "101",
+                "bidder_user_id": "405",
+                "amount_in_cents": 24853,
+                "time_received": "2021-12-01 19:41:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "139",
+                "item_id": "101",
+                "bidder_user_id": "412",
+                "amount_in_cents": 26123,
+                "time_received": "2021-12-01 19:43:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "140",
+                "item_id": "101",
+                "bidder_user_id": "481",
+                "amount_in_cents": 27520,
+                "time_received": "2021-12-01 19:44:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "141",
+                "item_id": "101",
+                "bidder_user_id": "465",
+                "amount_in_cents": 29002,
+                "time_received": "2021-12-01 19:45:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "142",
+                "item_id": "101",
+                "bidder_user_id": "483",
+                "amount_in_cents": 30416,
+                "time_received": "2021-12-01 19:46:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "143",
+                "item_id": "101",
+                "bidder_user_id": "442",
+                "amount_in_cents": 31627,
+                "time_received": "2021-12-01 19:47:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "144",
+                "item_id": "101",
+                "bidder_user_id": "429",
+                "amount_in_cents": 33627,
+                "time_received": "2021-12-01 19:50:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "145",
+                "item_id": "101",
+                "bidder_user_id": "433",
+                "amount_in_cents": 34681,
+                "time_received": "2021-12-01 19:55:01.000000",
+                "active": true
+            },
+            {
+                "bid_id": "146",
+                "item_id": "101",
+                "bidder_user_id": "480",
+                "amount_in_cents": 35991,
+                "time_received": "2021-12-01 19:55:59.000000",
+                "active": true
+            },
+            {
+                "bid_id": "147",
+                "item_id": "101",
+                "bidder_user_id": "435",
+                "amount_in_cents": 36991,
+                "time_received": "2021-12-01 19:56:30.000000",
+                "active": true
+            },
+            {
+                "bid_id": "148",
+                "item_id": "101",
+                "bidder_user_id": "442",
+                "amount_in_cents": 37991,
+                "time_received": "2021-12-01 19:58:49.000000",
+                "active": true
+            },
+            {
+                "bid_id": "149",
+                "item_id": "101",
+                "bidder_user_id": "495",
+                "amount_in_cents": 38991,
+                "time_received": "2021-12-01 19:59:47.000000",
+                "active": true
+            },
+            {
+                "bid_id": "150",
+                "item_id": "101",
+                "bidder_user_id": "481",
+                "amount_in_cents": 39991,
+                "time_received": "2021-12-01 19:59:49.000000",
+                "active": true
+            },
+            {
+                "bid_id": "151",
+                "item_id": "101",
+                "bidder_user_id": "422",
+                "amount_in_cents": 40991,
+                "time_received": "2021-12-01 19:59:50.800000",
+                "active": true
+            }
+        ]
+    },
+    {
+        "item_id": "102",
+        "start_price_in_cents": 200000,
+        "start_time": "2021-12-13 16:00:00.000000",
+        "end_time": "2021-12-14 12:00:00.000000",
+        "cancellation_time": "2021-12-14 09:00:00.000000",
+        "finalized_time": "2021-12-14 10:00:00.000000",
+        "bids": [
+            {
+                "bid_id": "152",
+                "item_id": "102",
+                "bidder_user_id": "403",
+                "amount_in_cents": 200000,
+                "time_received": "2021-12-13 17:15:00.800000",
+                "active": true
+            },
+            {
+                "bid_id": "153",
+                "item_id": "102",
+                "bidder_user_id": "412",
+                "amount_in_cents": 210000,
+                "time_received": "2021-12-13 19:15:00.651000",
+                "active": true
+            },
+            {
+                "bid_id": "154",
+                "item_id": "102",
+                "bidder_user_id": "401",
+                "amount_in_cents": 230000,
+                "time_received": "2021-12-13 19:20:00.210000",
+                "active": true
+            },
+            {
+                "bid_id": "155",
+                "item_id": "102",
+                "bidder_user_id": "417",
+                "amount_in_cents": 730000,
+                "time_received": "2021-12-13 19:50:00.200110",
+                "active": false
+            }
+        ]
+    }
+]

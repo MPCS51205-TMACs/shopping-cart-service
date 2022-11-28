@@ -1,0 +1,1 @@
+mongoimport --db closed_auction_metrics_db --collection auctions --drop --file /docker-entrypoint-initdb.d/data.json --jsonArray

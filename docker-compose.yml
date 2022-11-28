@@ -1,0 +1,65 @@
+version: "3.2"
+services:
+  rabbitmq-server:
+    image: rabbitmq:3-management        # image name
+    container_name: rabbitmq-server     # name the container
+    hostname: rabbitmq-server           # name the host
+    tty: true                           # boilerplate: allows -it basically ?
+    stdin_open: true                    # boilerplate: allows -it basically ?
+    networks:                           # allows containers to recognize the hostnames of other containers
+      - my-application-network
+    ports:
+      - "5672:5672"                     # for message traffic
+      - "15672:15672"                   # for managment console
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:15672"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+  cart-mongo-server:
+    build:
+      context: ./mongodb
+    image: cart-mongo-server:latest
+    container_name: cart-mongo-server
+    hostname: cart-mongo-server
+    environment:                        # sets environment variables
+      - MONGODB_PASS=password
+    # volumes:
+      # - mongodata:/data/db # allows persistence; see https://betterprogramming.pub/persistent-databases-using-dockers-volumes-and-mongodb-9ac284c25b39
+    networks:
+      - my-application-network
+    ports:
+      - "28017:28017"
+      - "27017:27017"
+    restart: always
+  shopping-cart-service:
+    build:
+      context: ./shopping-cart-service
+    image: shopping-cart-service:latest
+    container_name: shopping-cart-service-service
+    hostname: shopping-cart-service-service
+    # entrypoint: python3 api_main.py         # execute the compiled main program (golang)
+    entrypoint: /bin/bash
+    tty: true
+    stdin_open: true
+    restart: on-failure                 # restarts container when it goes down
+    volumes:
+      - "${SHOPPING_CART_DIR_PATH}/shopping-cart-service:/shopping-cart-service-debug" # for debugging, mount src folder as separate folder
+      # - ${SHOPPING_CART_DIR_PATH}/shopping-cart-service:/shopping-cart-service-debug # for debugging, mount src folder as separate folder
+    networks:
+      - my-application-network
+    ports:
+      - "10001:10001"                   # allows localhost and other containers to reach this container's [REST/HTTP API]
+                                        # other containers can ping this container [e.g. REST/HTTP API] with notations HOST:PORT=auctions-service:10000
+                                        # example from inside other container: "http://auction-service:10000/createAuction"
+                                        # example from localhost: "http://localhost:10000/createAuction"
+    depends_on:
+      - rabbitmq-server
+      - cart-mongo-server
+
+networks:
+  my-application-network:
+    driver: bridge
+
+# volumes:
+#   pgdata: # clear persisted data with 'docker volume rm 51205-project_pgdata'
