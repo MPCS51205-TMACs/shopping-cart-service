@@ -3,30 +3,31 @@ from typing import Dict, Set, Optional
 from domain.cart import *
 from pymongo import MongoClient
 from pymongo.database import Database, Collection
+from pymongo.errors import AutoReconnect
 
 class ReceiptRepository(ABC):
 
     @abstractmethod
-    def get(self, receipt_id: str) -> Receipt:
+    def get(self, receipt_id: str) -> Optional[Receipt]:
         pass
 
     @abstractmethod
     def save(self, receipt: Receipt) -> None:
         pass
 
-class InMemoryReceiptRepository:
+class InMemoryReceiptRepository(ReceiptRepository):
     
     def __init__(self) -> None:
         self._receipts : Dict[str,Receipt] = dict()
 
-    def get(self, receipt_id: str) -> Receipt:
+    def get(self, receipt_id: str) -> Optional[Receipt]:
         if receipt_id in self._receipts:
             return self._receipts[receipt_id]
 
     def save(self, receipt: Receipt) -> None:
         self._receipts[receipt._receipt_id] = receipt
 
-class MongoDbReceiptRepository:
+class MongoDbReceiptRepository(ReceiptRepository):
 
     DATABASE_NAME = "cart_db" # name of mongo db database for this service
     RECEIPTS_COLLECTION_NAME = "receipts" 
@@ -60,30 +61,56 @@ class MongoDbReceiptRepository:
 
         
     def _get_receipts_collection(self) -> Collection:
-        return self.my_db[self.RECEIPTS_COLLECTION_NAME]
+        try:
+            return self.my_db[self.RECEIPTS_COLLECTION_NAME]
+        except AutoReconnect:
+            self._reestablish_connection()
 
     def get(self, receipt_id: str) -> Optional[Receipt]:
         """returns receipt based on id"""
+        print(f"[MongoDbCartItemsRepository] getting Receipt object, receipt_id={receipt_id} to MongoDb")
         query_doc = {
             "receipt_id": receipt_id
         }
-        receipts_collection = self._get_receipts_collection()
-        data = receipts_collection.find_one(query_doc)
+
+        try:
+            receipts_collection = self._get_receipts_collection()
+            data = receipts_collection.find_one(query_doc)
+        except AutoReconnect:
+            self._reestablish_connection()
+            receipts_collection = self._get_receipts_collection()
+            data = receipts_collection.find_one(query_doc)
+
+        # print(f"what is in the db: (saved receipt_id={receipt_id})")
+        # for document in cursor:
+        #     print(document)
+
         if data:
-            return Receipt.from_data_dict_to_receipt(data["item_ids"])
+            return Receipt.from_data_dict_to_receipt(data["receipt"])
         else:
-            return []
+            return None
 
     def save(self, receipt: Receipt) -> None:
-        doc = receipt.to_data_dict()
-
-    def save_item_ids(self, user_id : str, item_ids: List[str]) -> None:
-        """saves the list of item_id's that are in user's cart"""
+        """saves the Receipt object"""
+        print(f"[MongoDbCartItemsRepository] saving Receipt object, receipt_id={receipt._receipt_id} to MongoDb")
         doc = {
-            "user_id": user_id,
-            "item_ids": item_ids
+            "receipt_id": receipt._receipt_id,
+            "receipt": receipt.to_data_dict()
         }
-        receipts_collection = self._get_receipts_collection()
-        data = receipts_collection.replace_one({ 'user_id': user_id }, doc, )
-        # data = receipts_collection.updateOne({ 'user_id': user_id }, { '$addToSet': { "item_ids": {'$each': item_ids} } })
 
+        try:
+            receipts_collection = self._get_receipts_collection()
+            data = receipts_collection.replace_one({ 'receipt_id': receipt._receipt_id }, doc, upsert=True)
+        except AutoReconnect:
+            self._reestablish_connection()
+            receipts_collection = self._get_receipts_collection()
+            data = receipts_collection.replace_one({ 'receipt_id': receipt._receipt_id }, doc, upsert=True)
+
+        cursor = receipts_collection.find({})
+        print(f"after saving, what is in the db: (saved receipt_id={receipt._receipt_id})")
+        for document in cursor:
+            print(document)
+
+    def _reestablish_connection(self):
+        self.client = MongoClient(self.mongo_db_connection_url)
+        self.my_db = self.client[self.DATABASE_NAME]

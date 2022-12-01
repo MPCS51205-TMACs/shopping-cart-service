@@ -16,7 +16,7 @@ from multiprocessing.managers import BaseManager
 # from infrastructure import utils
 # from domain.bid import Bid
 # from domain.closed_auction import ClosedAuction
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 import pprint
 from domain.cart_service import CartService
 from domain.cart import rand_carts, rand_items, rand_item, rand_cart, Cart
@@ -46,6 +46,10 @@ class RESTAPI:
         self.router.add_api_route("/carts/item", self.add_item_to_cart, methods=["POST"])
         self.router.add_api_route("/carts/item", self.remove_item_from_cart, methods=["DELETE"])
         self.router.add_api_route("/carts/checkout", self.checkout, methods=["POST"])
+        self.router.add_api_route("/boughtitems/{bought_item_id}", self.get_bought_item, methods=["GET"])
+        self.router.add_api_route("/receipts/{receipt_id}", self.get_receipt, methods=["GET"])
+        self.router.add_api_route("/receipts/", self.get_receipts, methods=["GET"]) # expect query parameter for item_id
+
         # self.router.add_api_route(f"/carts/{item_id}/visualization", self.get_closed_auction_visualization, response_class=HTMLResponse,methods=["GET"])
         
     def index(self) -> dict:
@@ -57,6 +61,30 @@ class RESTAPI:
             Default response
         """
         return {"home": "route"}
+
+    def get_bought_item(self, bought_item_id: str) -> Dict:
+        """
+        
+        """
+        # pass
+        # always returns a 200
+        return self.cart_service.get_bought_item(bought_item_id)
+
+    def get_receipt(self, receipt_id: str) -> Dict:
+        """
+        
+        """
+        # pass
+        # always returns a 200
+        return self.cart_service.get_receipt(receipt_id)
+
+    def get_receipts(self, item_id: Optional[str]=None) -> Dict:
+        """
+        NOTE for now, always expecting a query parameter with an item_id
+        """
+        # pass
+        # always returns a 200
+        return self.cart_service.get_receipts(bought_item_id=item_id)
 
     def get_cart(self, user_id: str) -> Dict:
         """
@@ -114,23 +142,37 @@ class RESTAPI:
         else, succeeds
         """
         user_id = request_body.user_id
-        violating_item_ids, receipt = self.cart_service.checkout(user_id)
-        if len(violating_item_ids) > 0:
-            bought_items_str = ", ".join([short_str(item_id) for item_id in violating_item_ids])
-            raise HTTPException(status_code=404, detail=f"fail. the following items have already been purchased: {bought_items_str}")
+        already_bought_item_ids, item_ids_w_live_auctions, receipt = self.cart_service.checkout(user_id)
+        # add case for items not existing / not being able to find the item (i.e. items context doesn't have the item details)??
+        if len(already_bought_item_ids) + len(item_ids_w_live_auctions) > 0:
+            bought_items_str = ", ".join([short_str(item_id) for item_id in already_bought_item_ids])
+            live_items_str = ", ".join([short_str(item_id) for item_id in item_ids_w_live_auctions])
+            msg = "fail."
+            msg += ("Cart contained items that were already bought: "+ bought_items_str) if len(already_bought_item_ids) > 0 else ""
+            msg += ("Cart contained items with live auctions: "+ live_items_str) if len(item_ids_w_live_auctions) > 0 else ""
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "message": msg,
+                    "already_bought_item_ids": already_bought_item_ids,
+                    "live_item_ids": item_ids_w_live_auctions
+                }
+            )
+        if receipt:
+            print(receipt.to_console_str())
         return { "message": "success!", "receipt": receipt.to_data_dict()}
 
 
 
 def start_receiving_rabbitmsgs(cart_service : CartService):
-    try:
+    # try:
         receive_rabbitmq_msgs(cart_service)
-    except KeyboardInterrupt:
-        print('Interrupted')
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
+    # except KeyboardInterrupt:
+    #     print('Interrupted')
+    #     try:
+    #         sys.exit(0)
+    #     except SystemExit:
+    #         os._exit(0)
 
 def receive_rabbitmq_msgs(cart_service : CartService):
 
@@ -154,16 +196,20 @@ def receive_rabbitmq_msgs(cart_service : CartService):
         jsondata = json.loads(body)
         print(json.dumps(jsondata, indent=2))
 
-        if "Cancellation" in jsondata:
-            print(" [x] Ignoring. this is a canceled / stopped auction.")
+        if "Cancellation" in jsondata and jsondata["Cancellation"] is not None:
+            print("[main] ignoring. this was a cancelled auction.")
             return
 
-        if "WinningBid" in jsondata["WinningBid"]:
-            item_id = jsondata["item_id"]
-            user_id = jsondata["bidder_user_id"]
-            amount_in_cents = jsondata["amount_in_cents"]
+        if "WinningBid" in jsondata and jsondata["WinningBid"] is not None:
+            item_id = jsondata["WinningBid"]["item_id"]
+            user_id = jsondata["WinningBid"]["bidder_user_id"]
+            amount_in_cents = jsondata["WinningBid"]["amount_in_cents"]
             cart_service.full_checkout(user_id,item_id,amount_in_cents)
             return 
+
+        if "Bids" in jsondata and len(jsondata["Bids"]) == 0:
+            print("[main] ignoring. no winner, no cancellation.")
+            return
         
         print("[main] SEE receive_rabbitmq_msgs(). reached end of method without understanding situation")
 
@@ -174,15 +220,15 @@ def receive_rabbitmq_msgs(cart_service : CartService):
     channel.start_consuming()
 
 def startupRESTAPI(app: FastAPI, port:int, log_level:str = "info"):
-    uvicorn.run(host="0.0.0.0",app=app, port=port, log_level=log_level)
-    # proc = Process(target=uvicorn.run,
-    #                 args=(app,),
-    #                 kwargs={
-    #                     "host": "0.0.0.0", # e.g. "127.0.0.1",
-    #                     "port": port,
-    #                     "log_level": "info"},
-    #                 daemon=True)
-    # proc.start()
+    # uvicorn.run(host="0.0.0.0",app=app, port=port, log_level=log_level)
+    proc = Process(target=uvicorn.run,
+                    args=(app,),
+                    kwargs={
+                        "host": "0.0.0.0", # e.g. "127.0.0.1",
+                        "port": port,
+                        "log_level": "info"},
+                    daemon=True)
+    proc.start()
 
 LOCAL_PORT = 10001 # port for this service (And its restful api)
 
@@ -190,53 +236,69 @@ def main():
 
     app = FastAPI()
 
-    inMemory = True
+    inMemory = False
 
-    if inMemory: # use in memory repos
-        from domain.cart_repository import CartRepository, InMemoryCartRepository
-        from domain.receipt_repository import ReceiptRepository, InMemoryReceiptRepository, MongoDbReceiptRepository
-        from domain.bought_items_repository import BoughtItemsRepository, InMemoryBoughtItemsRepository, MongoDbBoughtItemsRepository
-        from domain.item_repository import ItemRepository, InMemoryItemRepository, HTTPProxyItemRepository
-        from domain.cart_repository_composite import CompositeCartRepository, CartItemsRepository, InMemoryCartItemsRepository, MongoDbCartItemsRepository
-        
+    from domain.cart_repository import CartRepository, InMemoryCartRepository
+    from domain.receipt_repository import ReceiptRepository, InMemoryReceiptRepository, MongoDbReceiptRepository
+    from domain.bought_items_repository import BoughtItemsRepository, InMemoryBoughtItemsRepository, MongoDbBoughtItemsRepository
+    from domain.item_repository import ItemRepository, InMemoryItemRepository, HTTPProxyItemRepository
+    from domain.cart_repository_composite import CompositeCartRepository, CartItemsRepository, InMemoryCartItemsRepository, MongoDbCartItemsRepository
+    from domain.proxy_user_service import ProxyUserService, StubbedProxyUserService, HTTPProxyUserService
+    
+    mongo_hostname = "cart-mongo-server"
+    mongo_port = "27017" # e.g. 27017
+    # base connection url = mongodb://{hostname}:{port}/
+
+    if inMemory:
         receipt_repo : ReceiptRepository = InMemoryReceiptRepository()
-        # receipt_repo : ReceiptRepository = MongoDbReceiptRepository(hostname=, port=)
-
         bought_items_repo : BoughtItemsRepository = InMemoryBoughtItemsRepository()
-        # bought_items_repo : BoughtItemsRepository = MongoDbBoughtItemsRepository(hostname=, port=)
-
-        # items_repo : ItemRepository = InMemoryItemRepository()
-        item_service_connection_url = "http://item-service:8088/"
-        items_repo : ItemRepository = HTTPProxyItemRepository(item_service_connection_url)
         cart_items_repo : CartItemsRepository = InMemoryCartItemsRepository()
-        cart_repo : CartRepository = CompositeCartRepository(items_repo,cart_items_repo)
+    else:
+        receipt_repo : ReceiptRepository = MongoDbReceiptRepository(hostname=mongo_hostname, port=mongo_port)
+        bought_items_repo : BoughtItemsRepository = MongoDbBoughtItemsRepository(hostname=mongo_hostname, port=mongo_port)
+        cart_items_repo : CartItemsRepository = MongoDbCartItemsRepository(hostname=mongo_hostname, port=mongo_port)
+
+    # TODO: for now, shoppingcart will use an admin token that lasts ~30 days from now (11/30/2022)
+    # in future, this service needs to obtain an admin token it can use to ask User-service for admin-level
+    # details on Users (payment info).
+    TEMP_ADMIN_SERVICE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NDcwMTVjOC1kODI4LTQwNGUtYjg3OC1lYThlNTRhMzk5ZDkiLCJpc3MiOiJ1c2VyLXNlcnZpY2UiLCJhdWQiOiJtcGNzNTEyMDUiLCJlbWFpbCI6Im1hdHRAbXBjcy5jb20iLCJuYW1lIjoibWF0dCIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwiaWF0IjoxNjY5NDA4MDY2LCJleHAiOjE2NzIwMDAwNjZ9.N1x3fIBUz9CLDtabc9Lig6a4VFmRPdQaJwYX2Vabov0"
+    connection_url = "http://user-service:8080"
+    proxy_user_service : ProxyUserService = HTTPProxyUserService(connection_url,TEMP_ADMIN_SERVICE_TOKEN)
+    # proxy_user_service : ProxyUserService = StubbedProxyUserService()
+
+    # items_repo : ItemRepository = InMemoryItemRepository()
+    item_service_connection_url = "http://item-service:8088/"
+    items_repo : ItemRepository = HTTPProxyItemRepository(item_service_connection_url)
+
+    cart_repo : CartRepository = CompositeCartRepository(items_repo,cart_items_repo)
 
 
-        # cart_service = CartService(cart_repo,receipt_repo,bought_items_repo,items_repo)
+    # cart_service = CartService(cart_repo,receipt_repo,bought_items_repo,items_repo)
 
-        items = [rand_item() for _ in range (20)]
-        person1 =  "harry"
-        person2 =  "Matt"
-        person3 =  "Sam"
-        person4 =  "Patricia"
-        cart1 = Cart(person1,items[0:4])
-        cart2 = Cart(person2,items[4:10])
-        cart3 = Cart(person3,items[10:15])
-        cart4 = Cart(person4,items[15:21])
-        carts = [cart1,cart2,cart3,cart4]
+    # items = [rand_item() for _ in range (20)]
+    # person1 =  "harry"
+    # person2 =  "Matt"
+    # person3 =  "Sam"
+    # person4 =  "Patricia"
+    # cart1 = Cart(person1,items[0:4])
+    # cart2 = Cart(person2,items[4:10])
+    # cart3 = Cart(person3,items[10:15])
+    # cart4 = Cart(person4,items[15:21])
+    # carts = [cart1,cart2,cart3,cart4]
 
-        items_repo.add_items(items)
-        for cart in carts:
-            cart_repo.save_cart(cart)
+    # items_repo.add_items(items)
+    # for cart in carts:
+    #     cart_repo.save_cart(cart)
 
-        print(items)
-        print()
-        print(carts)
-        
+    # print(items)
+    # print()
+    # print(carts)
+    
+    if inMemory:
         BaseManager.register('CartService', CartService)
         manager = BaseManager()
         manager.start()
-        cart_service = manager.CartService(cart_repo,receipt_repo,bought_items_repo,items_repo)
+        cart_service = manager.CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service)
 
         api = RESTAPI(cart_service)
         app.include_router(api.router)
@@ -246,6 +308,17 @@ def main():
 
         # main function enters method that blocks and never returns
         start_receiving_rabbitmsgs(cart_service)
+    else:
+        cart_service1 = CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service)
+        cart_service2 = CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service)
+        api = RESTAPI(cart_service1)
+        app.include_router(api.router)
+        
+        # spawn child process to handle the HTTP requests against the REST api
+        startupRESTAPI(app,LOCAL_PORT)
+
+        # main function enters method that blocks and never returns
+        start_receiving_rabbitmsgs(cart_service2)
 
         # auction_repo: AuctionRepository = InMemoryAuctionRepository()
         

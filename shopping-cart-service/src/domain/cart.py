@@ -18,7 +18,7 @@ class Cart(object):
 
     def empty(self) -> List[Item]:
         """empties the cart (removes all items)"""
-        his_items = self._items
+        his_items = self._items.copy()
         self._items : List[Item] = []
         return his_items
 
@@ -44,9 +44,10 @@ class Cart(object):
                 return True
         return False
 
-    def checkout(self) -> Receipt:
-        print("[Cart] checking out... [PAYMENT VERIFICATION STUBBED]. generated receipt.")
-        return Receipt(str(uuid.uuid4()),Bill(self._items),localize(datetime.datetime.now()))
+    def checkout(self, payment_info: str) -> Receipt:
+        print(f"[Cart] checking out...using payment info: '{payment_info}'. generated receipt.")
+        # TODO: get payment info
+        return Receipt(str(uuid.uuid4()),Bill(self._items),localize(datetime.datetime.now()),payment_info)
 
     def __contains__(self, item_id: str):
         if item_id in [item.item_id for item in self._items]:
@@ -66,10 +67,11 @@ class Cart(object):
 
 class Receipt(object):
 
-    def __init__(self,  receipt_id: str, bill: Bill, time: datetime.datetime) -> None:
+    def __init__(self,  receipt_id: str, bill: Bill, time: datetime.datetime, payment_info : str) -> None:
         self._bill = bill
         self._receipt_id = receipt_id
         self._time = time
+        self._payment_info = payment_info
 
     def __repr__(self) -> str:
         args = ", ".join([short_str(self._receipt_id),to_fancy_dollars(self._bill.total_cost()), toSQLTimestamp6Repr(self._time)+" UTC"])
@@ -84,7 +86,22 @@ class Receipt(object):
         return {
             'receipt_id': self._receipt_id,
             'time_processed': toSQLTimestamp6Repr(self._time),
-            'bill': self._bill.to_data_dict()
+            'bill': self._bill.to_data_dict(),
+            'payment_info': self._payment_info
+        }
+
+    def to_full_data_dict(self) -> Dict:
+        """
+        returns a json-like representation of the internal contents
+        of a Receipt.
+        """
+
+        return {
+            'receipt_id': self._receipt_id,
+            'time_processed': toSQLTimestamp6Repr(self._time),
+            'bill': self._bill.to_data_dict(),
+            'payment_info': self._payment_info,
+            'repr': self.to_console_str()
         }
 
     @staticmethod
@@ -97,6 +114,37 @@ class Receipt(object):
         receipt_id = data["receipt_id"] if "receipt_id" in data else ""
         time_processed = toDatetimeFromStr(data["time_processed"]) if "time_processed" in data else None
         bill = Bill.from_data_dict_to_bill(data["bill"]) if "bill" in data else None
+        payment_info = data["payment_info"] if "payment_info" in data else ""
+        return Receipt(receipt_id,bill,time_processed,payment_info)
+
+    def to_console_str(self) -> str:
+        """returns a string representation of a receipt, with new line characters;
+        meant to be a pretty representation when printing to console"""
+        width = 58
+        receipt_str = "#"*width
+        receipt_str += f"\n# receipt_id: {(short_str(self._receipt_id,width-18)).rjust(width-16)} #"
+        receipt_str += f"\n# date: {(short_str(toSQLTimestamp6Repr(self._time),width-8)).rjust(width-16)} [UTC] #"
+        receipt_str += f"\n# payment_info: {(short_str(self._payment_info,width-24)).rjust(width-18)} #"
+        receipt_str += "\n#"+" "*(width-2)+"#"
+        receipt_str += f"\n# item_ids"+" "*(width-19)+" price  #"
+        receipt_str += "\n"+"#"*width
+        for item in self._bill._items:
+            line_item_width = width - 4
+            amount_str = to_fancy_dollars(item.total_cost())
+            amount_width = len(amount_str)
+            space_for_user_id = line_item_width-amount_width-1
+            user_id_repr = short_str(item.item_id,space_for_user_id)
+            user_id_repr = user_id_repr.ljust(space_for_user_id)
+            content = f"# {user_id_repr} {amount_str} #"
+            receipt_str+="\n"+content
+        receipt_str += "\n# "+" "*(width-13)+"-"*9+" #"
+        receipt_str += "\n# "+to_fancy_dollars(self._bill.total_cost()).rjust(width-4)+" #"
+        receipt_str += "\n"+"#"*width
+        return receipt_str
+
+    def _short_str(letters: str, limit : int = 6) -> str:
+        return (letters[:limit] + '..') if len(letters) > limit else letters
+
 
 class Bill(object):
 
@@ -136,10 +184,11 @@ class Bill(object):
 
 class Item(object):
 
-    def __init__(self, item_id : str, price_cents : int,  shipping_cost_cents : int ) -> None:
+    def __init__(self, item_id : str, price_cents : int,  shipping_cost_cents : int, auction_start_time : datetime.datetime ) -> None:
         self.item_id = item_id
         self._price_cents = price_cents
         self._shipping_cost_cents = shipping_cost_cents
+        self._auction_start_time = auction_start_time
 
     def total_cost(self) -> int:
         return self._price_cents + self._shipping_cost_cents
@@ -151,6 +200,9 @@ class Item(object):
     def shipping_cost(self) -> int:
         """in cents (USD)"""
         return self._shipping_cost_cents
+
+    def is_pre_auction(self, aDatetime: datetime.datetime) -> bool:
+        return aDatetime < self._auction_start_time
 
     def __repr__(self) -> str:
         args = f"{short_str(self.item_id)}"
@@ -166,11 +218,12 @@ class Item(object):
             'item_id': self.item_id,
             'price_cents': self.price(),
             'shipping_cost_cents': self.shipping_cost(),
+            'auction_start_time': self._auction_start_time, # datetime
         }
 
     @staticmethod
     def from_data_dict_to_bill(data) -> Bill:
-        return Item(data['item_id'],data['price_cents'],data['shipping_cost_cents'])
+        return Item(data['item_id'],data['price_cents'],data['shipping_cost_cents'],data['auction_start_time'])
 
 def rand_items(quantity: int = 5) -> List[Item]:
     return [rand_item() for _ in range(quantity)]
@@ -179,7 +232,7 @@ def rand_item() -> Item:
     item_id = str(uuid.uuid4())
     cents = random.randint(50, 6000) # cents
     shipping_cost = random.randint(300, 1000)
-    item = Item(item_id,cents,shipping_cost)
+    item = Item(item_id,cents,shipping_cost,datetime.datetime.now())
     return item
 
 def rand_cart() -> Cart:
@@ -205,12 +258,12 @@ if __name__ == "__main__":
     print(cart.total_cost())
 
     print("bobbypin" in cart)
-    item = Item("bobbypin",3000,2000)
+    item = Item("bobbypin",3000,2000, datetime.datetime.now())
     cart.add(item)
     print("bobbypin" in cart)
     cart.remove(item.item_id)
     print("bobbypin" in cart)
-    receipt = cart.checkout()
+    receipt = cart.checkout("asdfj;l1k3241-9u1f3kfj3as") # random payment info
     print(receipt)
     print()
     print(cart.to_data_dict())

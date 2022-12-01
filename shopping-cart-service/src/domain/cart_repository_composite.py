@@ -3,6 +3,7 @@ from typing import Tuple
 from domain.cart import *
 from domain.cart_repository import *
 from domain.item_repository import *
+from pymongo.errors import AutoReconnect
 
 class CompositeCartRepository(CartRepository):
 
@@ -114,15 +115,29 @@ class MongoDbCartItemsRepository:
 
         
     def _get_cart_items_collection(self) -> Collection:
-        return self.my_db[self.CART_ITEMS_COLLECTION_NAME]
+        try:
+            return self.my_db[self.CART_ITEMS_COLLECTION_NAME]
+        except AutoReconnect:
+            self._reestablish_connection()
+
+    def _reestablish_connection(self):
+        self.client = MongoClient(self.mongo_db_connection_url)
+        self.my_db = self.client[self.DATABASE_NAME]
 
     def get_item_ids(self, user_id: str) -> List[str]:
         """returns list of item_id's that are in user's cart"""
+        print(f"[MongoDbCartItemsRepository] getting user_id, item_ids from MongoDb")
         query_doc = {
             "user_id": user_id
         }
-        cart_items_collection = self._get_cart_items_collection()
-        data = cart_items_collection.find_one(query_doc)
+        try:
+            cart_items_collection = self._get_cart_items_collection()
+            data = cart_items_collection.find_one(query_doc)
+        except AutoReconnect:
+            self._reestablish_connection()
+            cart_items_collection = self._get_cart_items_collection()
+            data = cart_items_collection.find_one(query_doc)
+        print(f"[MongoDbCartItemsRepository] found {len(data) if data else 0} document(s)")
         if data:
             return data["item_ids"]
         else:
@@ -131,6 +146,7 @@ class MongoDbCartItemsRepository:
     def get_user_item_mapping(self, query_item_ids: List[str]) -> Dict[str,Set[str]]:
         """accepts a list of query_item_ids and returns a mapping of user_ids to item_ids; i.e.,
         a list item_ids from the set of query_item_ids that are in each user's cart"""
+        print(f"[MongoDbCartItemsRepository] getting user_ids, item_ids from MongoDb")
         unique_nums = set(query_item_ids)
         cart_items_collection = self._get_cart_items_collection()
         query_doc = { "item_ids": { "$elemMatch": { "$in": query_item_ids }}}
@@ -141,16 +157,18 @@ class MongoDbCartItemsRepository:
             item_ids = doc["item_ids"]
             matching_ids = set(item_ids).union(unique_nums)
             results[user_id] = matching_ids
+        print(f"[MongoDbCartItemsRepository] found {len(results)} documents")
         return results
 
     def save_item_ids(self, user_id : str, item_ids: List[str]) -> None:
         """saves the list of item_id's that are in user's cart"""
+        print(f"[MongoDbCartItemsRepository] saving user_id, item_ids {len(item_ids)} to MongoDb")
         doc = {
             "user_id": user_id,
             "item_ids": item_ids
         }
         cart_items_collection = self._get_cart_items_collection()
-        data = cart_items_collection.replace_one({ 'user_id': user_id }, doc, )
+        data = cart_items_collection.replace_one({ 'user_id': user_id }, doc, upsert=True )
         # data = cart_items_collection.updateOne({ 'user_id': user_id }, { '$addToSet': { "item_ids": {'$each': item_ids} } })
 
 

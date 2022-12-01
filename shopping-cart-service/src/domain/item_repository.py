@@ -6,9 +6,11 @@ import requests
 
 class ItemRepository(ABC):
 
+    @abstractmethod
     def get_items(self, item_ids: List[str]) -> List[Item]:
         pass
 
+    @abstractmethod
     def add_items(self, item_ids: List[str]) -> None:
         pass
 
@@ -29,7 +31,6 @@ class HTTPProxyItemRepository(ItemRepository):
     def __init__(self, items_server_base_connection_url: str) -> None:
         super().__init__()
         self._base_url = items_server_base_connection_url # e.g. "http://item-service:8088/"
-        self._item_details : Dict[str,Dict[str,float]] = dict() # item_id -> Dict
 
     def get_items(self, item_ids: List[str]) -> List[Item]:
         collected_items : List[Item] = []
@@ -70,17 +71,19 @@ class HTTPProxyItemRepository(ItemRepository):
         quantity = json_data["quantity"] if "quantity" in json_data else None
         price = json_data["price"] if "price" in json_data else None # in dollars (double type)
         shippingCosts = json_data["shippingCosts"] if "shippingCosts" in json_data else None # in dollars (double type)
+        start_time = json_data["startTime"] if "startTime" in json_data else None # in dollars (double type)
         buyNow = json_data["buyNow"] if "buyNow" in json_data else None
         upForAuction = json_data["upForAuction"] if "upForAuction" in json_data else None
         counterfeit = json_data["counterfeit"] if "counterfeit" in json_data else None
         inappropriate = json_data["inappropriate"] if "inappropriate" in json_data else None
-        print("item_id=",type(item_id),item_id) # str
-        print("buyNow=",type(buyNow),buyNow) # bool
-        print("price=",type(price),price) # float
+        dt_start_time = toDatetimeFromStr(start_time)
+        # print("item_id=",type(item_id),item_id) # str
+        # print("buyNow=",type(buyNow),buyNow) # bool
+        # print("price=",type(price),price) # float
 
         price_cents = int(price*100)
         shippingCosts_cents = int(shippingCosts*100)
-        return Item(item_id,price_cents,shippingCosts_cents)
+        return Item(item_id,price_cents,shippingCosts_cents,dt_start_time)
 
     def add_items(self, items: List[Item]) -> None:
         """helper method for debugging"""
@@ -110,6 +113,7 @@ class InMemoryItemRepository(ItemRepository):
             item_data["item_id"] = item.item_id
             item_data["price_cents"] = item._price_cents
             item_data["shipping_cost_cents"] = item._shipping_cost_cents
+            item_data["start_time"] = item._shipping_cost_cents
             data[item.item_id] = item_data
 
     def to_item(self, data : Dict) -> Item:
@@ -118,7 +122,7 @@ class InMemoryItemRepository(ItemRepository):
         #     "price_cents" : ,
         #     "shipping_cost_cents" : ,
         # }
-        return Item(data["item_id"],data["price_cents"],data["shipping_cost_cents"])
+        return Item(data["item_id"],data["price_cents"],data["shipping_cost_cents"], data["start_time"])
         
 # class StubbedInMemoryItemRepository(ItemRepository):
 

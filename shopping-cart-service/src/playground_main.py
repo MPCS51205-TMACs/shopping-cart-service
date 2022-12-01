@@ -7,18 +7,73 @@
 # from domain.bid import Bid
 # from domain.closed_auction import ClosedAuction
 
+from domain.cart import *
+
 # import datetime
 import requests
-from domain.item_repository import HTTPProxyItemRepository
+# from domain.item_repository import HTTPProxyItemRepository
+from domain.proxy_user_service import ProxyUserService, StubbedProxyUserService, HTTPProxyUserService
+from domain.receipt_repository import *
 
 def main():
     # item_id = "012f81ca-307c-463c-d3da20c557d9"
-    url = "http://item-service:8088/"
+    # url = "http://item-service:8088/"
 
-    proxy = HTTPProxyItemRepository(url)
-    items = proxy.get_items(["634b9d96-3787-459a-8def-addfc761c10c","7c0c9a60-8212-4e0a-af14-1f8758f3d199"])
-    print()
-    print(items)
+    # proxy = HTTPProxyItemRepository(url)
+    # items = proxy.get_items(["634b9d96-3787-459a-8def-addfc761c10c","7c0c9a60-8212-4e0a-af14-1f8758f3d199"])
+    # print()
+    # print(items)
+    
+    # print(rand_item())
+    # print(rand_items())
+    
+    # items = rand_items()
+    # bill = Bill(items)
+
+    # print(bill)
+    # print(bill.total_cost())
+    # print(to_fancy_dollars(bill.total_cost()))
+
+    # cart = Cart("alex", rand_items())
+    # print(cart)
+    # print(cart.total_cost())
+
+    # print("bobbypin" in cart)
+    # item = Item("bobbypin",3000,2000, localize(datetime.datetime.now()))
+    # cart.add(item)
+    # print("bobbypin" in cart)
+    # cart.remove(item.item_id)
+    # print("bobbypin" in cart)
+    # receipt = cart.checkout("12813f09318jf1012813f09318jf1012813f09318jf1012813f09318jf10") # rand payment info
+    # print(receipt)
+    # print()
+    # print(cart.to_data_dict())
+
+    # print(receipt.to_console_str())
+
+
+
+    mongo_hostname = "cart-mongo-server"
+    mongo_port = "27017" # e.g. 27017
+    # base connection url = mongodb://{hostname}:{port}/
+
+
+    receipt_repo : ReceiptRepository = MongoDbReceiptRepository(hostname=mongo_hostname, port=mongo_port)
+    obj = receipt_repo.get("cc2c6e68-6c50-43e5-8cd6-84214ac6b511")
+    print(obj)
+    # # TODO: for now, UserService will use an admin token that lasts ~30 days from now (11/30/2022)
+    # # in future, this service needs to obtain an admin token it can use to ask User-service for admin-level
+    # # details on Users (payment info).
+    # TEMP_ADMIN_SERVICE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NDcwMTVjOC1kODI4LTQwNGUtYjg3OC1lYThlNTRhMzk5ZDkiLCJpc3MiOiJ1c2VyLXNlcnZpY2UiLCJhdWQiOiJtcGNzNTEyMDUiLCJlbWFpbCI6Im1hdHRAbXBjcy5jb20iLCJuYW1lIjoibWF0dCIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwiaWF0IjoxNjY5NDA4MDY2LCJleHAiOjE2NzIwMDAwNjZ9.N1x3fIBUz9CLDtabc9Lig6a4VFmRPdQaJwYX2Vabov0"
+    # connection_url = "http://user-service:8080"
+    # # user_service : ProxyUserService = HTTPProxyUserService(connection_url,TEMP_ADMIN_SERVICE_TOKEN)
+    # user_service : ProxyUserService = StubbedProxyUserService()
+
+    # user_id = "3f4fb3ca-05b3-4d5e-bd22-f9c99be5eb61"
+
+    # info = user_service.fetch_payment_info(user_id)
+    # print("paymentinfo: ",info)
+
  
     # data = {
     #     "id": 1001,
