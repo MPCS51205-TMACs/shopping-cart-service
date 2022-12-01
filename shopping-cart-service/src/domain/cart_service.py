@@ -140,13 +140,22 @@ class CartService():
                 print(f"[CartService] fail. {already_live} item(s) have live auctions: item_ids={live_items_str}")
             return already_bought_ids,already_live_ids, None
             # raise NotImplementedError("TO RETURN STATEMENT")
-        else: # good to buy; BUT NEED TO CANCEL THE AUCTION
+        else: # good to buy; 
+            # but we have a problem: we need to cancel the auction associated with every item we are buying;
+            # this is sore point in the design: we make synchronous REST calls (irreversible) to cancel the auction of every associated
+            # item in the cart. If we fail to cancel the auction for just one item, we decide to not follow through with checkout.
+            # thus, some items may never get to the chance to be bought in auction: if N items are being bought, and 1 has a failed auctionCancel,
+            # then as many as N-1 items may have their auctions canceled. Interestingly, they can still be bought via bia now (so long as before
+            # auction start time), but they will not have an auction. 
             for item in his_items_purchased:
                 canceled = self._proxy_auction_service.stop_auction(item.item_id) # all should pass since they are just prior or at auction start
                 if canceled:
                     print(f"[CartService] successfully instructed AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
                 else :
                     print(f"[CartService] Fail. Oh no! did NOT successfully instruct AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
+                    print(f"[CartService] aborting checkout.")
+                    return
+
             for item in his_items_purchased: # note to self: these items are marked bought
                 self._bought_items_repo.add(item.item_id,his_receipt._receipt_id)
             self._cart_repo.save_cart(his_cart) # save knowledge his cart is now empty
