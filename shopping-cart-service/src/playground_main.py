@@ -13,6 +13,7 @@ from domain.cart import *
 import requests
 # from domain.item_repository import HTTPProxyItemRepository
 from domain.proxy_user_service import ProxyUserService, StubbedProxyUserService, HTTPProxyUserService
+from domain.proxy_auctions_service import ProxyAuctionService, HTTPProxyAuctionService
 from domain.receipt_repository import *
 
 def main():
@@ -64,8 +65,13 @@ def main():
     # # TODO: for now, UserService will use an admin token that lasts ~30 days from now (11/30/2022)
     # # in future, this service needs to obtain an admin token it can use to ask User-service for admin-level
     # # details on Users (payment info).
-    # TEMP_ADMIN_SERVICE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NDcwMTVjOC1kODI4LTQwNGUtYjg3OC1lYThlNTRhMzk5ZDkiLCJpc3MiOiJ1c2VyLXNlcnZpY2UiLCJhdWQiOiJtcGNzNTEyMDUiLCJlbWFpbCI6Im1hdHRAbXBjcy5jb20iLCJuYW1lIjoibWF0dCIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwiaWF0IjoxNjY5NDA4MDY2LCJleHAiOjE2NzIwMDAwNjZ9.N1x3fIBUz9CLDtabc9Lig6a4VFmRPdQaJwYX2Vabov0"
-    # connection_url = "http://user-service:8080"
+    TEMP_ADMIN_SERVICE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NDcwMTVjOC1kODI4LTQwNGUtYjg3OC1lYThlNTRhMzk5ZDkiLCJpc3MiOiJ1c2VyLXNlcnZpY2UiLCJhdWQiOiJtcGNzNTEyMDUiLCJlbWFpbCI6Im1hdHRAbXBjcy5jb20iLCJuYW1lIjoibWF0dCIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwiaWF0IjoxNjY5NDA4MDY2LCJleHAiOjE2NzIwMDAwNjZ9.N1x3fIBUz9CLDtabc9Lig6a4VFmRPdQaJwYX2Vabov0"
+    auction_connection_url = "http://auctions-service:10000"
+    proxy_auction_service : ProxyAuctionService = HTTPProxyAuctionService(auction_connection_url,TEMP_ADMIN_SERVICE_TOKEN)
+
+    item_id="71819d0b-12b9-4dc5-8402-e86642d37f17"
+    proxy_auction_service.stop_auction(item_id)
+
     # # user_service : ProxyUserService = HTTPProxyUserService(connection_url,TEMP_ADMIN_SERVICE_TOKEN)
     # user_service : ProxyUserService = StubbedProxyUserService()
 

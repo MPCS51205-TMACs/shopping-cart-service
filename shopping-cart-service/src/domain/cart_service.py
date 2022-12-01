@@ -9,6 +9,7 @@ from domain.bought_items_repository import BoughtItemsRepository
 from domain.item_repository import ItemRepository
 from domain.cart import Cart, Receipt, to_fancy_dollars
 from domain.proxy_user_service import ProxyUserService
+from domain.proxy_auctions_service import ProxyAuctionService
 
 class CartService():
 
@@ -17,13 +18,15 @@ class CartService():
         receipt_repository: ReceiptRepository,
         bought_items_repository: BoughtItemsRepository,
         item_repository: ItemRepository,
-        proxy_user_service: ProxyUserService) -> None:
+        proxy_user_service: ProxyUserService,
+        proxy_auction_service: ProxyAuctionService) -> None:
         
         self._cart_repo = cart_repository
         self._receipt_repo = receipt_repository
         self._bought_items_repo = bought_items_repository
         self._item_repo = item_repository
         self._proxy_user_service = proxy_user_service
+        self._proxy_auction_service = proxy_auction_service
         
     def add_item_to_cart(self, user_id: str, item_id: str) -> bool:
         print("[CartService] adding item to cart")
@@ -137,7 +140,13 @@ class CartService():
                 print(f"[CartService] fail. {already_live} item(s) have live auctions: item_ids={live_items_str}")
             return already_bought_ids,already_live_ids, None
             # raise NotImplementedError("TO RETURN STATEMENT")
-        else: # good to buy
+        else: # good to buy; BUT NEED TO CANCEL THE AUCTION
+            for item in his_items_purchased:
+                canceled = self._proxy_auction_service.stop_auction(item.item_id) # all should pass since they are just prior or at auction start
+                if canceled:
+                    print(f"[CartService] successfully instructed AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
+                else :
+                    print(f"[CartService] Fail. Oh no! did NOT successfully instruct AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
             for item in his_items_purchased: # note to self: these items are marked bought
                 self._bought_items_repo.add(item.item_id,his_receipt._receipt_id)
             self._cart_repo.save_cart(his_cart) # save knowledge his cart is now empty

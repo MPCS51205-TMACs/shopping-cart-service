@@ -244,6 +244,7 @@ def main():
     from domain.item_repository import ItemRepository, InMemoryItemRepository, HTTPProxyItemRepository
     from domain.cart_repository_composite import CompositeCartRepository, CartItemsRepository, InMemoryCartItemsRepository, MongoDbCartItemsRepository
     from domain.proxy_user_service import ProxyUserService, StubbedProxyUserService, HTTPProxyUserService
+    from domain.proxy_auctions_service import ProxyAuctionService, StubbedProxyAuctionService, HTTPProxyAuctionService
     
     mongo_hostname = "cart-mongo-server"
     mongo_port = "27017" # e.g. 27017
@@ -262,14 +263,16 @@ def main():
     # in future, this service needs to obtain an admin token it can use to ask User-service for admin-level
     # details on Users (payment info).
     TEMP_ADMIN_SERVICE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NDcwMTVjOC1kODI4LTQwNGUtYjg3OC1lYThlNTRhMzk5ZDkiLCJpc3MiOiJ1c2VyLXNlcnZpY2UiLCJhdWQiOiJtcGNzNTEyMDUiLCJlbWFpbCI6Im1hdHRAbXBjcy5jb20iLCJuYW1lIjoibWF0dCIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwiaWF0IjoxNjY5NDA4MDY2LCJleHAiOjE2NzIwMDAwNjZ9.N1x3fIBUz9CLDtabc9Lig6a4VFmRPdQaJwYX2Vabov0"
-    connection_url = "http://user-service:8080"
-    proxy_user_service : ProxyUserService = HTTPProxyUserService(connection_url,TEMP_ADMIN_SERVICE_TOKEN)
+    user_connection_url = "http://user-service:8080"
+    proxy_user_service : ProxyUserService = HTTPProxyUserService(user_connection_url,TEMP_ADMIN_SERVICE_TOKEN)
     # proxy_user_service : ProxyUserService = StubbedProxyUserService()
+
+    auction_connection_url = "http://auctions-service:10000"
+    proxy_auction_service : ProxyAuctionService = HTTPProxyAuctionService(auction_connection_url,TEMP_ADMIN_SERVICE_TOKEN)
 
     # items_repo : ItemRepository = InMemoryItemRepository()
     item_service_connection_url = "http://item-service:8088/"
     items_repo : ItemRepository = HTTPProxyItemRepository(item_service_connection_url)
-
     cart_repo : CartRepository = CompositeCartRepository(items_repo,cart_items_repo)
 
 
@@ -298,7 +301,7 @@ def main():
         BaseManager.register('CartService', CartService)
         manager = BaseManager()
         manager.start()
-        cart_service = manager.CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service)
+        cart_service = manager.CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service, proxy_auction_service)
 
         api = RESTAPI(cart_service)
         app.include_router(api.router)
@@ -309,8 +312,8 @@ def main():
         # main function enters method that blocks and never returns
         start_receiving_rabbitmsgs(cart_service)
     else:
-        cart_service1 = CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service)
-        cart_service2 = CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service)
+        cart_service1 = CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service, proxy_auction_service)
+        cart_service2 = CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service, proxy_auction_service)
         api = RESTAPI(cart_service1)
         app.include_router(api.router)
         
