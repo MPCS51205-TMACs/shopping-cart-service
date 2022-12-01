@@ -202,7 +202,7 @@ class CartService():
             print(f"did not find a receipt with receipt_id={receipt_id}")
             return None
 
-    def get_receipts(self, bought_item_id: Optional[str]=None) -> Optional[Dict[str,Any]]:
+    def get_receipts(self, bought_item_id: Optional[str]=None, user_id: Optional[str]=None) -> Optional[Dict[str,Any]]:
         """
         """
         if bought_item_id:
@@ -220,6 +220,9 @@ class CartService():
                 # return 404
                 print(f"did not find a receipt with item_id={receipt_id}")
                 return None
+        elif user_id:
+            receipts = self._receipt_repo.get_by_user_id(user_id)
+            return [receipt.to_full_data_dict() for receipt in receipts]
         else:
             print("NOT IMPLEMENTED: RETURN ALL CARTS (PROBABLY SHOULD LIMIT)")
             return None

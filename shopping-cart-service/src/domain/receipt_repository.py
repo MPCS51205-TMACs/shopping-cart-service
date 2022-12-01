@@ -4,11 +4,16 @@ from domain.cart import *
 from pymongo import MongoClient
 from pymongo.database import Database, Collection
 from pymongo.errors import AutoReconnect
+from pprint import pprint
 
 class ReceiptRepository(ABC):
 
     @abstractmethod
     def get(self, receipt_id: str) -> Optional[Receipt]:
+        pass
+
+    @abstractmethod
+    def get_by_user_id(self, user_id: str) -> List[Receipt]:
         pass
 
     @abstractmethod
@@ -23,6 +28,13 @@ class InMemoryReceiptRepository(ReceiptRepository):
     def get(self, receipt_id: str) -> Optional[Receipt]:
         if receipt_id in self._receipts:
             return self._receipts[receipt_id]
+
+    def get_by_user_id(self, user_id: str) -> List[Receipt]:
+        receipts : List[Receipt] = []
+        for receipt in self._receipts.values():
+            if receipt._user_id == user_id:
+                receipts.append(receipt)
+        return receipts
 
     def save(self, receipt: Receipt) -> None:
         self._receipts[receipt._receipt_id] = receipt
@@ -90,6 +102,26 @@ class MongoDbReceiptRepository(ReceiptRepository):
         else:
             return None
 
+    def get_by_user_id(self, user_id: str) -> List[Receipt]:
+        """returns receipts based on user_id"""
+        query_doc = {
+            "receipt.user_id": user_id
+        }
+
+        try:
+            receipts_collection = self._get_receipts_collection()
+            cursor = receipts_collection.find(query_doc)
+        except AutoReconnect:
+            self._reestablish_connection()
+            receipts_collection = self._get_receipts_collection()
+            cursor = receipts_collection.find(query_doc)
+
+        receipts : List[Receipt] = []
+        for data in cursor:
+            receipts.append(Receipt.from_data_dict_to_receipt(data["receipt"]))
+
+        return receipts
+
     def save(self, receipt: Receipt) -> None:
         """saves the Receipt object"""
         print(f"[MongoDbCartItemsRepository] saving Receipt object, receipt_id={receipt._receipt_id} to MongoDb")
@@ -106,10 +138,12 @@ class MongoDbReceiptRepository(ReceiptRepository):
             receipts_collection = self._get_receipts_collection()
             data = receipts_collection.replace_one({ 'receipt_id': receipt._receipt_id }, doc, upsert=True)
 
-        cursor = receipts_collection.find({})
-        print(f"after saving, what is in the db: (saved receipt_id={receipt._receipt_id})")
-        for document in cursor:
-            print(document)
+        # pprint(data, indent=2)
+
+        # cursor = receipts_collection.find({})
+        # print(f"after saving, what is in the db: (saved receipt_id={receipt._receipt_id})")
+        # for document in cursor:
+        #     print(document)
 
     def _reestablish_connection(self):
         self.client = MongoClient(self.mongo_db_connection_url)

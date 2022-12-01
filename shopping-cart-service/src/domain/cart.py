@@ -47,7 +47,7 @@ class Cart(object):
     def checkout(self, payment_info: str) -> Receipt:
         print(f"[Cart] checking out...using payment info: '{payment_info}'. generated receipt.")
         # TODO: get payment info
-        return Receipt(str(uuid.uuid4()),Bill(self._items),localize(datetime.datetime.now()),payment_info)
+        return Receipt(str(uuid.uuid4()),Bill(self._items),localize(datetime.datetime.now()),payment_info, self._user_id)
 
     def __contains__(self, item_id: str):
         if item_id in [item.item_id for item in self._items]:
@@ -67,11 +67,12 @@ class Cart(object):
 
 class Receipt(object):
 
-    def __init__(self,  receipt_id: str, bill: Bill, time: datetime.datetime, payment_info : str) -> None:
+    def __init__(self,  receipt_id: str, bill: Bill, time: datetime.datetime, payment_info : str, user_id : str) -> None:
         self._bill = bill
         self._receipt_id = receipt_id
         self._time = time
         self._payment_info = payment_info
+        self._user_id = user_id
 
     def __repr__(self) -> str:
         args = ", ".join([short_str(self._receipt_id),to_fancy_dollars(self._bill.total_cost()), toSQLTimestamp6Repr(self._time)+" UTC"])
@@ -85,6 +86,7 @@ class Receipt(object):
 
         return {
             'receipt_id': self._receipt_id,
+            'user_id': self._user_id,
             'time_processed': toSQLTimestamp6Repr(self._time),
             'bill': self._bill.to_data_dict(),
             'payment_info': self._payment_info
@@ -98,6 +100,7 @@ class Receipt(object):
 
         return {
             'receipt_id': self._receipt_id,
+            'user_id': self._user_id,
             'time_processed': toSQLTimestamp6Repr(self._time),
             'bill': self._bill.to_data_dict(),
             'payment_info': self._payment_info,
@@ -112,10 +115,11 @@ class Receipt(object):
         """
 
         receipt_id = data["receipt_id"] if "receipt_id" in data else ""
+        user_id = data["user_id"] if "user_id" in data else ""
         time_processed = toDatetimeFromStr(data["time_processed"]) if "time_processed" in data else None
         bill = Bill.from_data_dict_to_bill(data["bill"]) if "bill" in data else None
         payment_info = data["payment_info"] if "payment_info" in data else ""
-        return Receipt(receipt_id,bill,time_processed,payment_info)
+        return Receipt(receipt_id,bill,time_processed,payment_info,user_id)
 
     def to_console_str(self) -> str:
         """returns a string representation of a receipt, with new line characters;
@@ -123,6 +127,7 @@ class Receipt(object):
         width = 58
         receipt_str = "#"*width
         receipt_str += f"\n# receipt_id: {(short_str(self._receipt_id,width-18)).rjust(width-16)} #"
+        receipt_str += f"\n# user_id: {(short_str(self._receipt_id,width-21)).rjust(width-16)} #"
         receipt_str += f"\n# date: {(short_str(toSQLTimestamp6Repr(self._time),width-8)).rjust(width-16)} [UTC] #"
         receipt_str += f"\n# payment_info: {(short_str(self._payment_info,width-24)).rjust(width-18)} #"
         receipt_str += "\n#"+" "*(width-2)+"#"

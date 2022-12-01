@@ -78,13 +78,13 @@ class RESTAPI:
         # always returns a 200
         return self.cart_service.get_receipt(receipt_id)
 
-    def get_receipts(self, item_id: Optional[str]=None) -> Dict:
+    def get_receipts(self, item_id: Optional[str]=None, user_id: Optional[str]=None) -> Dict:
         """
-        NOTE for now, always expecting a query parameter with an item_id
+        NOTE for now, always expecting a query parameter with an item_id or user_id
         """
         # pass
         # always returns a 200
-        return self.cart_service.get_receipts(bought_item_id=item_id)
+        return self.cart_service.get_receipts(bought_item_id=item_id, user_id=user_id)
 
     def get_cart(self, user_id: str) -> Dict:
         """
