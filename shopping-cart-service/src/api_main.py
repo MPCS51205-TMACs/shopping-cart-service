@@ -17,10 +17,19 @@ from multiprocessing.managers import BaseManager
 # from domain.bid import Bid
 # from domain.closed_auction import ClosedAuction
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.requests import Request
 import pprint
 from domain.cart_service import CartService
 from domain.cart import rand_carts, rand_items, rand_item, rand_cart, Cart
 from domain.utils import *
+from domain.cart_repository import CartRepository, InMemoryCartRepository
+from domain.receipt_repository import ReceiptRepository, InMemoryReceiptRepository, MongoDbReceiptRepository
+from domain.bought_items_repository import BoughtItemsRepository, InMemoryBoughtItemsRepository, MongoDbBoughtItemsRepository
+from domain.item_repository import ItemRepository, InMemoryItemRepository, HTTPProxyItemRepository
+from domain.cart_repository_composite import CompositeCartRepository, CartItemsRepository, InMemoryCartItemsRepository, MongoDbCartItemsRepository
+from domain.proxy_user_service import ProxyUserService, StubbedProxyUserService, HTTPProxyUserService
+from domain.proxy_auctions_service import ProxyAuctionService, StubbedProxyAuctionService, HTTPProxyAuctionService
+from security.authenticator import Authenticator, JwtParser
 
 VERSION = 'v1'
 
@@ -37,9 +46,10 @@ class RequestCheckout(BaseModel):
 
 class RESTAPI:
 
-    def __init__(self, cart_service: CartService):
+    def __init__(self, cart_service: CartService, auth:Authenticator):
         self.cart_service = cart_service
         self.router = APIRouter()
+        self.auth = auth
         # self.router.add_api_route("/hello", self.hello, methods=["GET"])
         self.router.add_api_route("/", self.index, methods=["GET"])
         self.router.add_api_route("/carts/{user_id}", self.get_cart, methods=["GET"])
@@ -62,31 +72,181 @@ class RESTAPI:
         """
         return {"home": "route"}
 
-    def get_bought_item(self, bought_item_id: str) -> Dict:
+    def get_bought_item(self, bought_item_id: str,request:Request) -> Dict:
         """
         
         """
-        # pass
-        # always returns a 200
-        return self.cart_service.get_bought_item(bought_item_id)
+        if "authorization" in request.headers:
+            token_chunks = request.headers["authorization"].split()
+            if len(token_chunks) != 2:
+                return JSONResponse(
+                    status_code=401,
+                    content={
+                        "message": "jwt bearer token provided was not in format expected 'Bearer asdkfjao;eij;slkdcja'",
+                    }
+                )
+            token = token_chunks[1]
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "request did not have an authorization header",
+                }
+            )
+        request_user_id, withErrs = self.auth.extract_user_id(token)
+        if withErrs:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "could not parse jwt token and interpret user id; bad token",
+                }
+            )
 
-    def get_receipt(self, receipt_id: str) -> Dict:
+        data = self.cart_service.get_bought_item(bought_item_id)
+        if len(data) == 0 or "receipt_id" not in data:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "could not find a receipt associated with this item_id; may not exist or may not be bought",
+                }
+            )
+        
+        receipt_id = data["receipt_id"]
+        receipt_data = self.cart_service.get_receipt(receipt_id)
+        belongs_to_user = request_user_id == receipt_data["user_id"]
+        is_admin = self.auth.is_admin(token)
+        if belongs_to_user or is_admin:
+            return receipt_data
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": f"user not authorized to access receipt: isAdmin={is_admin} receiptBelongsToUser={belongs_to_user}",
+                }
+            )
+
+    def get_receipt(self, receipt_id: str, request:Request) -> Dict:
         """
         
         """
-        # pass
-        # always returns a 200
-        return self.cart_service.get_receipt(receipt_id)
+        if "authorization" in request.headers:
+            token_chunks = request.headers["authorization"].split()
+            if len(token_chunks) != 2:
+                return JSONResponse(
+                    status_code=401,
+                    content={
+                        "message": "jwt bearer token provided was not in format expected 'Bearer asdkfjao;eij;slkdcja'",
+                    }
+                )
+            token = token_chunks[1]
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "request did not have an authorization header",
+                }
+            )
+        request_user_id, withErrs = self.auth.extract_user_id(token)
+        if withErrs:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "could not parse jwt token and interpret user id; bad token",
+                }
+            )
 
-    def get_receipts(self, item_id: Optional[str]=None, user_id: Optional[str]=None) -> Dict:
+        receipt_data = self.cart_service.get_receipt(receipt_id)
+        belongs_to_user = request_user_id == receipt_data["user_id"]
+        is_admin = self.auth.is_admin(token)
+        if belongs_to_user or is_admin:
+            return receipt_data
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": f"user not authorized to access receipt: isAdmin={is_admin} receiptBelongsToUser={belongs_to_user}",
+                }
+            )
+        
+    def get_receipts(self,request: Request, item_id: Optional[str]=None, user_id: Optional[str]=None) -> Dict:
         """
         NOTE for now, always expecting a query parameter with an item_id or user_id
         """
-        # pass
-        # always returns a 200
-        return self.cart_service.get_receipts(bought_item_id=item_id, user_id=user_id)
 
-    def get_cart(self, user_id: str) -> Dict:
+        if "authorization" in request.headers:
+            token_chunks = request.headers["authorization"].split()
+            if len(token_chunks) != 2:
+                return JSONResponse(
+                    status_code=401,
+                    content={
+                        "message": "jwt bearer token provided was not in format expected 'Bearer asdkfjao;eij;slkdcja'",
+                    }
+                )
+            token = token_chunks[1]
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "request did not have an authorization header",
+                }
+            )
+        request_user_id, withErrs = self.auth.extract_user_id(token)
+        if withErrs:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "could not parse jwt token and interpret user id; bad token",
+                }
+            )
+
+        data = self.cart_service.get_receipts(bought_item_id=item_id, user_id=user_id)
+        if len(data)==0:
+            return JSONResponse(
+                    status_code=404,
+                    content={
+                        "message": f"did not find the receipt(s) in database.",
+                    }
+                )
+        aReceipt = data[0]
+
+        if user_id: # request wants receipts filtered by user, must be that user or admin
+            is_admin = self.auth.is_admin(token)
+            if "user_id" not in aReceipt and is_admin:
+                return data
+            else:
+                receiptOwner = aReceipt["user_id"]
+            is_requester_the_user = receiptOwner == request_user_id
+            
+            if is_requester_the_user or is_admin:
+                return data
+            else:
+                return JSONResponse(
+                    status_code=401,
+                    content={
+                        "message": f"requester not authorized to receipts on user_id={short_str(user_id)}: isAdmin={is_admin} requesterIsReceiptOwner={is_requester_the_user}",
+                    }
+                )
+        
+        if item_id: # request wants a receipt by item id, must be that user or admin
+            is_admin = self.auth.is_admin(token)
+            if "user_id" not in aReceipt and is_admin: # only allow for admin; receipt internal data did not have a user_id for some reason
+                return data
+            else:
+                receiptOwner = aReceipt["user_id"]
+            is_requester_the_receipt_owner = receiptOwner == request_user_id
+            if is_requester_the_receipt_owner or is_admin:
+                return data
+            else:
+                return JSONResponse(
+                    status_code=401,
+                    content={
+                        "message": f"requester not authorized to access receipt(s) on item_id={short_str(item_id)}: isAdmin={is_admin} requesterIsReceiptOwner={is_requester_the_receipt_owner}",
+                    }
+                )
+
+        return [] # if we missed something return nothing
+
+    def get_cart(self, user_id: str, request:Request) -> Dict:
         """
         Returns a response containing cart information.
 
@@ -109,14 +269,89 @@ class RESTAPI:
         Sample response body:
         {        }
         """
+        if "authorization" in request.headers:
+            token_chunks = request.headers["authorization"].split()
+            if len(token_chunks) != 2:
+                return JSONResponse(
+                    status_code=401,
+                    content={
+                        "message": "jwt bearer token provided was not in format expected 'Bearer asdkfjao;eij;slkdcja'",
+                    }
+                )
+            token = token_chunks[1]
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "request did not have an authorization header",
+                }
+            )
+        request_user_id, withErrs = self.auth.extract_user_id(token)
+        if withErrs:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "could not parse jwt token and interpret user id; bad token",
+                }
+            )
+        is_requester_the_user = user_id == request_user_id
+        is_admin = self.auth.is_admin(token)
+
+        if is_requester_the_user or is_admin:
+            pass
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": f"user not authorized to get the cart: isAdmin={is_admin} requesterIsCartOwner={is_requester_the_user}",
+                }
+            )
         # always returns a 200
         return self.cart_service.get_cart(user_id)
 
-    def add_item_to_cart(self, request_body: RequestAddItem):
+    def add_item_to_cart(self, request_body: RequestAddItem, request: Request):
         """
         can fail if: can't find in item repository;
         else, succeeds
         """
+        if "authorization" in request.headers:
+            token_chunks = request.headers["authorization"].split()
+            if len(token_chunks) != 2:
+                return JSONResponse(
+                    status_code=401,
+                    content={
+                        "message": "jwt bearer token provided was not in format expected 'Bearer asdkfjao;eij;slkdcja'",
+                    }
+                )
+            token = token_chunks[1]
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "request did not have an authorization header",
+                }
+            )
+        request_user_id, withErrs = self.auth.extract_user_id(token)
+        if withErrs:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "could not parse jwt token and interpret user id; bad token",
+                }
+            )
+        is_requester_the_user = request_body.user_id == request_user_id
+        is_admin = self.auth.is_admin(token)
+
+        if is_requester_the_user or is_admin:
+            pass
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": f"user not authorized to add item to cart: isAdmin={is_admin} requesterIsTheUser={is_requester_the_user}",
+                }
+            )
+
         item_id = request_body.item_id
         user_id = request_body.user_id
         added = self.cart_service.add_item_to_cart(user_id,item_id)
@@ -124,11 +359,49 @@ class RESTAPI:
             raise HTTPException(status_code=404, detail=f"could not find item_id={item_id}")
         return { "message": f"success! added item_id={short_str(item_id)} to cart of user_id={user_id}"}
 
-    def remove_item_from_cart(self, request_body: RequestRemoveItem):
+    def remove_item_from_cart(self, request_body: RequestRemoveItem, request: Request):
         """
         can fail if: can't find item in cart;
         else, succeeds
         """
+        if "authorization" in request.headers:
+            token_chunks = request.headers["authorization"].split()
+            if len(token_chunks) != 2:
+                return JSONResponse(
+                    status_code=401,
+                    content={
+                        "message": "jwt bearer token provided was not in format expected 'Bearer asdkfjao;eij;slkdcja'",
+                    }
+                )
+            token = token_chunks[1]
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "request did not have an authorization header",
+                }
+            )
+        request_user_id, withErrs = self.auth.extract_user_id(token)
+        if withErrs:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "could not parse jwt token and interpret user id; bad token",
+                }
+            )
+        is_requester_the_user = request_body.user_id == request_user_id
+        is_admin = self.auth.is_admin(token)
+        if is_requester_the_user or is_admin:
+            pass
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": f"user not authorized to remove item from cart: isAdmin={is_admin} requesterIsTheUser={is_requester_the_user}",
+                }
+            )
+
+
         item_id = request_body.item_id
         user_id = request_body.user_id
         removed = self.cart_service.remove_item_from_cart(user_id,item_id)
@@ -136,11 +409,48 @@ class RESTAPI:
             raise HTTPException(status_code=400, detail=f"item_id={short_str(item_id)} was not in cart of user_id={user_id}")
         return { "message": f"success! removed item_id={short_str(item_id)} from cart of  user_id={user_id}"}
 
-    def checkout(self, request_body : RequestCheckout):
+    def checkout(self, request_body : RequestCheckout,request: Request):
         """
         fails if an item in the cart is already purchased;
         else, succeeds
         """
+        if "authorization" in request.headers:
+            token_chunks = request.headers["authorization"].split()
+            if len(token_chunks) != 2:
+                return JSONResponse(
+                    status_code=401,
+                    content={
+                        "message": "jwt bearer token provided was not in format expected 'Bearer asdkfjao;eij;slkdcja'",
+                    }
+                )
+            token = token_chunks[1]
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "request did not have an authorization header",
+                }
+            )
+        request_user_id, withErrs = self.auth.extract_user_id(token)
+        if withErrs:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": "could not parse jwt token and interpret user id; bad token",
+                }
+            )
+        is_requester_the_user = request_body.user_id == request_user_id
+        is_admin = self.auth.is_admin(token)
+        if is_requester_the_user or is_admin:
+            pass
+        else:
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "message": f"user not authorized to checkout cart: requesterIsCartOwner={is_requester_the_user}",
+                }
+            )
+
         user_id = request_body.user_id
         already_bought_item_ids, item_ids_w_live_auctions, receipt = self.cart_service.checkout(user_id)
         # add case for items not existing / not being able to find the item (i.e. items context doesn't have the item details)??
@@ -161,7 +471,6 @@ class RESTAPI:
         if receipt:
             print(receipt.to_console_str())
         return { "message": "success!", "receipt": receipt.to_data_dict()}
-
 
 
 def start_receiving_rabbitmsgs(cart_service : CartService):
@@ -219,7 +528,7 @@ def receive_rabbitmq_msgs(cart_service : CartService):
 #     # channel.basic_consume(queue='task_queue', on_message_callback=callback)
     channel.start_consuming()
 
-def startupRESTAPI(app: FastAPI, port:int, log_level:str = "info"):
+def startupRESTAPI(app: FastAPI, port:int,log_level:str = "info"):
     # uvicorn.run(host="0.0.0.0",app=app, port=port, log_level=log_level)
     proc = Process(target=uvicorn.run,
                     args=(app,),
@@ -238,15 +547,10 @@ def main():
 
     inMemory = False
 
-    from domain.cart_repository import CartRepository, InMemoryCartRepository
-    from domain.receipt_repository import ReceiptRepository, InMemoryReceiptRepository, MongoDbReceiptRepository
-    from domain.bought_items_repository import BoughtItemsRepository, InMemoryBoughtItemsRepository, MongoDbBoughtItemsRepository
-    from domain.item_repository import ItemRepository, InMemoryItemRepository, HTTPProxyItemRepository
-    from domain.cart_repository_composite import CompositeCartRepository, CartItemsRepository, InMemoryCartItemsRepository, MongoDbCartItemsRepository
-    from domain.proxy_user_service import ProxyUserService, StubbedProxyUserService, HTTPProxyUserService
-    from domain.proxy_auctions_service import ProxyAuctionService, StubbedProxyAuctionService, HTTPProxyAuctionService
+
     
     mongo_hostname = "cart-mongo-server"
+    # mongo_hostname = "localhost"
     mongo_port = "27017" # e.g. 27017
     # base connection url = mongodb://{hostname}:{port}/
 
@@ -258,6 +562,10 @@ def main():
         receipt_repo : ReceiptRepository = MongoDbReceiptRepository(hostname=mongo_hostname, port=mongo_port)
         bought_items_repo : BoughtItemsRepository = MongoDbBoughtItemsRepository(hostname=mongo_hostname, port=mongo_port)
         cart_items_repo : CartItemsRepository = MongoDbCartItemsRepository(hostname=mongo_hostname, port=mongo_port)
+
+    # create authenticator, which verifies requests and extracts identity from jwt tokens
+    secret = "G+KbPeShVmYq3t6w9z$C&F)J@McQfTjW"
+    auth = Authenticator(JwtParser(secret))
 
     # TODO: for now, shoppingcart will use an admin token that lasts ~30 days from now (11/30/2022)
     # in future, this service needs to obtain an admin token it can use to ask User-service for admin-level
@@ -303,7 +611,7 @@ def main():
         manager.start()
         cart_service = manager.CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service, proxy_auction_service)
 
-        api = RESTAPI(cart_service)
+        api = RESTAPI(cart_service, auth)
         app.include_router(api.router)
         
         # spawn child process to handle the HTTP requests against the REST api
@@ -314,7 +622,7 @@ def main():
     else:
         cart_service1 = CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service, proxy_auction_service)
         cart_service2 = CartService(cart_repo,receipt_repo,bought_items_repo,items_repo, proxy_user_service, proxy_auction_service)
-        api = RESTAPI(cart_service1)
+        api = RESTAPI(cart_service1, auth)
         app.include_router(api.router)
         
         # spawn child process to handle the HTTP requests against the REST api

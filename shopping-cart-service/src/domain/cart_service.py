@@ -210,7 +210,7 @@ class CartService():
             if receipt_id:
                 receipt = self._receipt_repo.get(receipt_id)
                 if receipt:
-                    return receipt.to_full_data_dict()
+                    return [receipt.to_full_data_dict()]
                 else:
                     # return 404
                     print(f"see cart_service.py get_receipts(); encountered strange case where item_id={utils.short_str(bought_item_id)} was bought but \

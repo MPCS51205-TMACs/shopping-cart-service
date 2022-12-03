@@ -44,7 +44,7 @@ services:
     stdin_open: true
     restart: on-failure                 # restarts container when it goes down
     volumes:
-      - "${SHOPPING_CART_DIR_PATH}/shopping-cart-service:/shopping-cart-service-debug" # for debugging, mount src folder as separate folder
+      - "./shopping-cart-service:/shopping-cart-service-debug" # for debugging, mount src folder as separate folder
       # - ${SHOPPING_CART_DIR_PATH}/shopping-cart-service:/shopping-cart-service-debug # for debugging, mount src folder as separate folder
     networks:
       - my-application-network
