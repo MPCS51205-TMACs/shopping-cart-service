@@ -452,25 +452,34 @@ class RESTAPI:
             )
 
         user_id = request_body.user_id
-        already_bought_item_ids, item_ids_w_live_auctions, receipt = self.cart_service.checkout(user_id)
+        already_bought_item_ids,not_preauction_buyable_ids,item_ids_w_live_auctions,counterfeit_ids, receipt = self.cart_service.checkout(user_id)
+        print(already_bought_item_ids,not_preauction_buyable_ids,item_ids_w_live_auctions,counterfeit_ids, receipt)
         # add case for items not existing / not being able to find the item (i.e. items context doesn't have the item details)??
-        if len(already_bought_item_ids) + len(item_ids_w_live_auctions) > 0:
+        if len(already_bought_item_ids) + len(not_preauction_buyable_ids) + len(item_ids_w_live_auctions) + len(counterfeit_ids) > 0:
             bought_items_str = ", ".join([short_str(item_id) for item_id in already_bought_item_ids])
+            not_buyable_str = ", ".join([short_str(item_id) for item_id in not_preauction_buyable_ids])
             live_items_str = ", ".join([short_str(item_id) for item_id in item_ids_w_live_auctions])
+            counterfeit_items_str = ", ".join([short_str(item_id) for item_id in counterfeit_ids])
             msg = "fail."
-            msg += ("Cart contained items that were already bought: "+ bought_items_str) if len(already_bought_item_ids) > 0 else ""
-            msg += ("Cart contained items with live auctions: "+ live_items_str) if len(item_ids_w_live_auctions) > 0 else ""
+            msg += (f" Cart contained items already bought: {bought_items_str}") if len(already_bought_item_ids) > 0 else ""
+            msg += (f" Cart contained items not buyable pre-auction (buynow=false): {not_buyable_str}") if len(not_preauction_buyable_ids) > 0 else ""
+            msg += (f" Cart contained items with live auctions: {live_items_str}") if len(item_ids_w_live_auctions) > 0 else ""
+            msg += (f" Cart contained items that are counterfeit: {counterfeit_items_str}") if len(counterfeit_ids) > 0 else ""
             return JSONResponse(
                 status_code=400,
                 content={
                     "message": msg,
                     "already_bought_item_ids": already_bought_item_ids,
-                    "live_item_ids": item_ids_w_live_auctions
+                    "not_preauction_buyable_ids": not_preauction_buyable_ids,
+                    "item_ids_w_live_auctions": item_ids_w_live_auctions,
+                    "counterfeit_ids": counterfeit_ids,
                 }
             )
         if receipt:
             print(receipt.to_console_str())
         return { "message": "success!", "receipt": receipt.to_data_dict()}
+
+        
 
 
 def start_receiving_rabbitmsgs(cart_service : CartService):

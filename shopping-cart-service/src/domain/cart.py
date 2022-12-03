@@ -150,7 +150,6 @@ class Receipt(object):
     def _short_str(letters: str, limit : int = 6) -> str:
         return (letters[:limit] + '..') if len(letters) > limit else letters
 
-
 class Bill(object):
 
     def __init__(self, items : List[Item]) -> None:
@@ -189,11 +188,14 @@ class Bill(object):
 
 class Item(object):
 
-    def __init__(self, item_id : str, price_cents : int,  shipping_cost_cents : int, auction_start_time : datetime.datetime ) -> None:
+    def __init__(self, item_id : str, price_cents : int,  shipping_cost_cents : int, auction_start_time : datetime.datetime, buy_now: bool, counterfeit: bool, inappropriate: bool  ) -> None:
         self.item_id = item_id
         self._price_cents = price_cents
         self._shipping_cost_cents = shipping_cost_cents
         self._auction_start_time = auction_start_time
+        self._buy_now = buy_now
+        self._counterfeit = counterfeit
+        self._inappropriate = inappropriate
 
     def total_cost(self) -> int:
         return self._price_cents + self._shipping_cost_cents
@@ -211,7 +213,16 @@ class Item(object):
 
     def __repr__(self) -> str:
         args = f"{short_str(self.item_id)}"
-        return "Item(" + args + ")" 
+        return "Item(" + args + ")"
+
+    def is_buynow_activatiated(self) -> bool:
+        return self._buy_now
+
+    def is_counterfeit(self) -> bool:
+        return self._counterfeit
+
+    def is_inappropriate(self) -> bool:
+        return self._inappropriate
 
     def to_data_dict(self) -> Dict:
         """
@@ -224,11 +235,14 @@ class Item(object):
             'price_cents': self.price(),
             'shipping_cost_cents': self.shipping_cost(),
             'auction_start_time': self._auction_start_time, # datetime
+            'buy_now': self._buy_now, # datetime
+            'counterfeit': self._counterfeit,
+            'inappropriate': self._inappropriate
         }
 
     @staticmethod
     def from_data_dict_to_bill(data) -> Bill:
-        return Item(data['item_id'],data['price_cents'],data['shipping_cost_cents'],data['auction_start_time'])
+        return Item(data['item_id'],data['price_cents'],data['shipping_cost_cents'],data['auction_start_time'],data['buy_now'],data['counterfeit'],data['inappropriate'])
 
 def rand_items(quantity: int = 5) -> List[Item]:
     return [rand_item() for _ in range(quantity)]
@@ -237,7 +251,7 @@ def rand_item() -> Item:
     item_id = str(uuid.uuid4())
     cents = random.randint(50, 6000) # cents
     shipping_cost = random.randint(300, 1000)
-    item = Item(item_id,cents,shipping_cost,datetime.datetime.now())
+    item = Item(item_id,cents,shipping_cost,datetime.datetime.now(), True,False,False)
     return item
 
 def rand_cart() -> Cart:
@@ -263,7 +277,7 @@ if __name__ == "__main__":
     print(cart.total_cost())
 
     print("bobbypin" in cart)
-    item = Item("bobbypin",3000,2000, datetime.datetime.now())
+    item = Item("bobbypin",3000,2000, datetime.datetime.now(),True,False,False)
     cart.add(item)
     print("bobbypin" in cart)
     cart.remove(item.item_id)

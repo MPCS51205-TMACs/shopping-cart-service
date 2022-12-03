@@ -83,7 +83,7 @@ class HTTPProxyItemRepository(ItemRepository):
 
         price_cents = int(price*100)
         shippingCosts_cents = int(shippingCosts*100)
-        return Item(item_id,price_cents,shippingCosts_cents,dt_start_time)
+        return Item(item_id,price_cents,shippingCosts_cents,dt_start_time,buyNow,counterfeit,inappropriate)
 
     def add_items(self, items: List[Item]) -> None:
         """helper method for debugging"""
@@ -114,6 +114,9 @@ class InMemoryItemRepository(ItemRepository):
             item_data["price_cents"] = item._price_cents
             item_data["shipping_cost_cents"] = item._shipping_cost_cents
             item_data["start_time"] = item._shipping_cost_cents
+            item_data["buy_now"] = item._buy_now
+            item_data["counterfeit"] = item._counterfeit
+            item_data["inappropriate"] = item._inappropriate
             data[item.item_id] = item_data
 
     def to_item(self, data : Dict) -> Item:
@@ -122,7 +125,7 @@ class InMemoryItemRepository(ItemRepository):
         #     "price_cents" : ,
         #     "shipping_cost_cents" : ,
         # }
-        return Item(data["item_id"],data["price_cents"],data["shipping_cost_cents"], data["start_time"])
+        return Item(data["item_id"],data["price_cents"],data["shipping_cost_cents"],data["start_time"] ,data["buy_now"],data["counterfeit"],data["inappropriate"])
         
 # class StubbedInMemoryItemRepository(ItemRepository):
 

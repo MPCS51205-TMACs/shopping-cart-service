@@ -71,6 +71,11 @@ class CartService():
         item_to_buy = items_found[0]
         item_to_buy._price_cents = price_cents # manually changing this items price because its resultant price is determined by auction result
 
+        if item_to_buy.is_counterfeit():
+            print("item was found to be counterfeit. will not follow through with checkout.")
+            print("aborting")
+            return
+
         # his_cart = self._cart_repo.get_cart(user_id)
         # his_items = his_cart.empty()
         # his_cart.add(item_to_buy)
@@ -89,7 +94,7 @@ class CartService():
         self._bought_items_repo.add(item_id,his_receipt._receipt_id) # note to self: this item was bought
         
 
-    def checkout(self, user_id:str) -> Tuple[List[str], List[str], Optional[Receipt]]:
+    def checkout(self, user_id:str) -> Tuple[List[str],List[str],List[str], List[str], Optional[Receipt]]:
         """
         executes a checkout; returns a list of violating item_ids of two kinds (items with
         live, ongoing auctions that cannot be bought, and items that have already been bought);
@@ -109,7 +114,7 @@ class CartService():
         if not paymentinfo:
             print("see cart_service.py full_checkout(). failed to find user payment info!. user may not exist or this service's auth token invalid")
             print("aborting")
-            return
+            return [],[],[],[],None
 
         his_receipt = his_cart.checkout(paymentinfo)
         his_items_purchased = his_cart.empty()
@@ -119,26 +124,53 @@ class CartService():
         already_bought_ids : List[str] = []
         already_live = 0
         already_live_ids : List[str] = []
+        not_preauction_buyable = 0
+        not_preauction_buyable_ids : List[str] = []
+        counterfeit = 0
+        counterfeit_ids : List[str] = []
+        inappropriate = 0
+        inappropriate_ids : List[str] = []
+        
         fail = False
         for item in his_items_purchased:
             if self._bought_items_repo.has(item.item_id): # check for violations: already purchased items
                 already_bought+=1
                 already_bought_ids.append(item.item_id)
+
+            elif not item.is_buynow_activatiated():
+                not_preauction_buyable+=1
+                not_preauction_buyable_ids.append(item.item_id)
+
             elif not item.is_pre_auction(utils.localize(datetime.datetime.now())): # check for violations: items with live auctions.
                 already_live+=1
                 already_live_ids.append(item.item_id)
-        print("number of violations =", (already_bought + already_live))
-        if already_bought > 0 or already_live > 0:
+            
+            if item.is_counterfeit(): # check for violations: counterfeit items
+                counterfeit+=1
+                counterfeit_ids.append(item.item_id)
+
+            if item.is_inappropriate(): # not a violation but will signal to user: inappropriate items
+                inappropriate+=1
+                inappropriate_ids.append(item.item_id)
+        
+        print("number of violations =", (already_bought + not_preauction_buyable + already_live + counterfeit))
+        if already_bought > 0 or not_preauction_buyable > 0 or already_live > 0 or counterfeit > 0:
             fail = True
         
         if fail:
             if already_bought > 0:
                 bought_items_str = ", ".join([utils.short_str(item_id) for item_id in already_bought_ids])
                 print(f"[CartService] fail. {already_bought} item(s) have already been purchased: item_ids={bought_items_str}")
+            if not_preauction_buyable > 0:
+                not_preauction_buyable_ids_str = ", ".join([utils.short_str(item_id) for item_id in not_preauction_buyable_ids])
+                print(f"[CartService] fail. {already_bought} item(s) have already been purchased: item_ids={not_preauction_buyable_ids_str}")
             if already_live > 0 :
                 live_items_str = ", ".join([utils.short_str(item_id) for item_id in already_live_ids])
                 print(f"[CartService] fail. {already_live} item(s) have live auctions: item_ids={live_items_str}")
-            return already_bought_ids,already_live_ids, None
+            if counterfeit > 0:
+                counterfeit_items_str = ", ".join([utils.short_str(item_id) for item_id in counterfeit_ids])
+                print(f"[CartService] fail. {already_bought} item(s) have already been purchased: item_ids={counterfeit_items_str}")
+            return already_bought_ids,not_preauction_buyable_ids,already_live_ids,counterfeit_ids, None
             # raise NotImplementedError("TO RETURN STATEMENT")
         else: # good to buy; 
             # but we have a problem: we need to cancel the auction associated with every item we are buying;
@@ -154,14 +186,14 @@ class CartService():
                 else :
                     print(f"[CartService] Fail. Oh no! did NOT successfully instruct AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
                     print(f"[CartService] aborting checkout.")
-                    return
+                    [],[],[],[],None
 
             for item in his_items_purchased: # note to self: these items are marked bought
                 self._bought_items_repo.add(item.item_id,his_receipt._receipt_id)
             self._cart_repo.save_cart(his_cart) # save knowledge his cart is now empty
             self._receipt_repo.save(his_receipt) # save receipt of the purchase
             print(f"[CartService] success. purchase complete. {to_fancy_dollars(his_receipt._bill.total_cost())} charged to user_id={utils.short_str(user_id)}")
-            return [],[],his_receipt
+            return [],[],[],[],his_receipt
             # raise NotImplementedError("TO RETURN STATEMENT")
 
     def get_cart(self, user_id:str) -> Dict:
