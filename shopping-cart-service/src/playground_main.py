@@ -11,16 +11,18 @@ from domain.cart import *
 
 # import datetime
 import requests
-# from domain.item_repository import HTTPProxyItemRepository
+from domain.item_repository import HTTPProxyItemRepository
 from domain.proxy_user_service import ProxyUserService, StubbedProxyUserService, HTTPProxyUserService
 from domain.proxy_auctions_service import ProxyAuctionService, HTTPProxyAuctionService
 from domain.receipt_repository import *
 
 def main():
     # item_id = "012f81ca-307c-463c-d3da20c557d9"
-    # url = "http://item-service:8088/"
-
-    # proxy = HTTPProxyItemRepository(url)
+    url = "http://item-service:8088"
+    TEMP_ADMIN_SERVICE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NDcwMTVjOC1kODI4LTQwNGUtYjg3OC1lYThlNTRhMzk5ZDkiLCJpc3MiOiJ1c2VyLXNlcnZpY2UiLCJhdWQiOiJtcGNzNTEyMDUiLCJlbWFpbCI6Im1hdHRAbXBjcy5jb20iLCJuYW1lIjoibWF0dCIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwiaWF0IjoxNjY5NDA4MDY2LCJleHAiOjE2NzIwMDAwNjZ9.N1x3fIBUz9CLDtabc9Lig6a4VFmRPdQaJwYX2Vabov0"
+    temp="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwYTQ3ZjUzMy03YzMxLTQ4NTYtOTEzOS1iZTE5OGE1MWEwYTgiLCJhdWQiOiJtcGNzNTEyMDUiLCJyZXZvY2F0aW9uSWQiOiIyOGI0ZmUyOC00NTJjLTQ2MDMtOWY0NC0xY2QyMjk1MDE2N2QiLCJpc3MiOiJ1c2VyLXNlcnZpY2UiLCJuYW1lIjoiWFNzYndMZGRYdGJHaDVzIiwiZXhwIjoxNjcwMTc5MzE1LCJpYXQiOjE2NzAxMzYxMTUsImVtYWlsIjoiWFNzYndMZGRYdGJHaDVzQG1wY3MuY29tIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9VU0VSIiwiUk9MRV9BRE1JTiJdfQ.wNHzDx2WElch5EXmPLDkc-BMDIxxsQaYEmRqdRJmzjA"
+    proxy = HTTPProxyItemRepository(url, temp)
+    proxy.mark_bought(["cac2a709-896a-462b-9085-85ddb4f4a77c"])
     # items = proxy.get_items(["634b9d96-3787-459a-8def-addfc761c10c","7c0c9a60-8212-4e0a-af14-1f8758f3d199"])
     # print()
     # print(items)
@@ -54,23 +56,23 @@ def main():
 
 
 
-    mongo_hostname = "cart-mongo-server"
-    mongo_port = "27017" # e.g. 27017
-    # base connection url = mongodb://{hostname}:{port}/
+    # mongo_hostname = "cart-mongo-server"
+    # mongo_port = "27017" # e.g. 27017
+    # # base connection url = mongodb://{hostname}:{port}/
 
 
-    receipt_repo : ReceiptRepository = MongoDbReceiptRepository(hostname=mongo_hostname, port=mongo_port)
-    obj = receipt_repo.get("cc2c6e68-6c50-43e5-8cd6-84214ac6b511")
-    print(obj)
-    # # TODO: for now, UserService will use an admin token that lasts ~30 days from now (11/30/2022)
-    # # in future, this service needs to obtain an admin token it can use to ask User-service for admin-level
-    # # details on Users (payment info).
-    TEMP_ADMIN_SERVICE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NDcwMTVjOC1kODI4LTQwNGUtYjg3OC1lYThlNTRhMzk5ZDkiLCJpc3MiOiJ1c2VyLXNlcnZpY2UiLCJhdWQiOiJtcGNzNTEyMDUiLCJlbWFpbCI6Im1hdHRAbXBjcy5jb20iLCJuYW1lIjoibWF0dCIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwiaWF0IjoxNjY5NDA4MDY2LCJleHAiOjE2NzIwMDAwNjZ9.N1x3fIBUz9CLDtabc9Lig6a4VFmRPdQaJwYX2Vabov0"
-    auction_connection_url = "http://auctions-service:10000"
-    proxy_auction_service : ProxyAuctionService = HTTPProxyAuctionService(auction_connection_url,TEMP_ADMIN_SERVICE_TOKEN)
+    # receipt_repo : ReceiptRepository = MongoDbReceiptRepository(hostname=mongo_hostname, port=mongo_port)
+    # obj = receipt_repo.get("cc2c6e68-6c50-43e5-8cd6-84214ac6b511")
+    # print(obj)
+    # # # TODO: for now, UserService will use an admin token that lasts ~30 days from now (11/30/2022)
+    # # # in future, this service needs to obtain an admin token it can use to ask User-service for admin-level
+    # # # details on Users (payment info).
+    # TEMP_ADMIN_SERVICE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NDcwMTVjOC1kODI4LTQwNGUtYjg3OC1lYThlNTRhMzk5ZDkiLCJpc3MiOiJ1c2VyLXNlcnZpY2UiLCJhdWQiOiJtcGNzNTEyMDUiLCJlbWFpbCI6Im1hdHRAbXBjcy5jb20iLCJuYW1lIjoibWF0dCIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiIsIlJPTEVfQURNSU4iXSwiaWF0IjoxNjY5NDA4MDY2LCJleHAiOjE2NzIwMDAwNjZ9.N1x3fIBUz9CLDtabc9Lig6a4VFmRPdQaJwYX2Vabov0"
+    # auction_connection_url = "http://auctions-service:10000"
+    # proxy_auction_service : ProxyAuctionService = HTTPProxyAuctionService(auction_connection_url,TEMP_ADMIN_SERVICE_TOKEN)
 
-    item_id="71819d0b-12b9-4dc5-8402-e86642d37f17"
-    proxy_auction_service.stop_auction(item_id)
+    # item_id="71819d0b-12b9-4dc5-8402-e86642d37f17"
+    # proxy_auction_service.stop_auction(item_id)
 
     # # user_service : ProxyUserService = HTTPProxyUserService(connection_url,TEMP_ADMIN_SERVICE_TOKEN)
     # user_service : ProxyUserService = StubbedProxyUserService()

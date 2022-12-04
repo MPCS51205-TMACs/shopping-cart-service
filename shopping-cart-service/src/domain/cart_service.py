@@ -89,6 +89,15 @@ class CartService():
         his_receipt = Cart(user_id,[item_to_buy]).checkout(paymentinfo)
         print("\n"+his_receipt.to_console_str())
 
+        markedBought = self._item_repo.mark_bought([item_to_buy.item_id])
+        if markedBought:
+            print(f"[CartService] successfully instructed ItemService to mark bought item_id = {utils.short_str(item_to_buy.item_id)}")
+            pass
+        else :                
+            print(f"[CartService] did NOT successfully instruct ItemService to mark item bought")
+            print(f"[CartService] proceeding with checkout anyway, since it is not critical the items context knows an item is bought")
+            pass
+
         # self._cart_repo.save_cart(his_cart)
         self._receipt_repo.save(his_receipt) # save receipt of the purchase
         self._bought_items_repo.add(item_id,his_receipt._receipt_id) # note to self: this item was bought
@@ -96,11 +105,10 @@ class CartService():
 
     def checkout(self, user_id:str) -> Tuple[List[str],List[str],List[str], List[str], Optional[Receipt]]:
         """
-        executes a checkout; returns a list of violating item_ids of two kinds (items with
-        live, ongoing auctions that cannot be bought, and items that have already been bought);
+        executes a checkout; returns a list of violating item_ids of various kinds and
         also returns a receipt (in case of success);
-        if checkout successful, will return two empty lists and a Receipt object;
-        if checkout unsuccessful, will return two lists (at least one is non-empty) and None
+        if checkout successful, will return 4 empty lists and a Receipt object;
+        if checkout unsuccessful, will return 4 lists (at least one is non-empty) and None.
         """
         print(f"[CartService] checking out cart of user_id={utils.short_str(user_id)}")
 
@@ -182,11 +190,26 @@ class CartService():
             for item in his_items_purchased:
                 canceled = self._proxy_auction_service.stop_auction(item.item_id) # all should pass since they are just prior or at auction start
                 if canceled:
-                    print(f"[CartService] successfully instructed AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
+                    pass
+                    # print(f"[CartService] successfully instructed AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
                 else :
                     print(f"[CartService] Fail. Oh no! did NOT successfully instruct AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
                     print(f"[CartService] aborting checkout.")
-                    [],[],[],[],None
+                    return [],[],[],[],None
+
+            # now, tell items-service to mark these items bought. This just helps update the state of items in the items-context for
+            # query purposes (so that queries may filter by items bought). A better invocation of items-service would be asynch,
+            # but the team is low on time, so we are using a synchronous RESTful-like call to the API of items-service
+            item_ids = [item.item_id for item in his_items_purchased]
+            markedAllBought = self._item_repo.mark_bought(item_ids)
+            if markedAllBought:
+                print(f"[CartService] successfully instructed AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
+                print(f"[CartService] successfully instructed ItemService to mark bought item_ids = {utils.short_str(item.item_id)}")
+                pass
+            else :                
+                print(f"[CartService] Fail. Oh no! did NOT successfully instruct ItemService to mark items bought")
+                print(f"[CartService] aborting checkout.")
+                return [],[],[],[],None
 
             for item in his_items_purchased: # note to self: these items are marked bought
                 self._bought_items_repo.add(item.item_id,his_receipt._receipt_id)

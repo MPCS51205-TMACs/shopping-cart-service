@@ -588,8 +588,8 @@ def main():
     proxy_auction_service : ProxyAuctionService = HTTPProxyAuctionService(auction_connection_url,TEMP_ADMIN_SERVICE_TOKEN)
 
     # items_repo : ItemRepository = InMemoryItemRepository()
-    item_service_connection_url = "http://item-service:8088/"
-    items_repo : ItemRepository = HTTPProxyItemRepository(item_service_connection_url)
+    item_service_connection_url = "http://item-service:8088"
+    items_repo : ItemRepository = HTTPProxyItemRepository(item_service_connection_url, TEMP_ADMIN_SERVICE_TOKEN)
     cart_repo : CartRepository = CompositeCartRepository(items_repo,cart_items_repo)
 
 

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Set, Optional
+import json
+from typing import Any, Dict, Set, Optional
 from domain.cart import *
 from domain.cart_repository import *
 import requests
@@ -12,6 +13,10 @@ class ItemRepository(ABC):
 
     @abstractmethod
     def add_items(self, item_ids: List[str]) -> None:
+        pass
+
+    @abstractmethod
+    def mark_bought(self, item_ids: List[str]) -> bool:
         pass
 
 class HTTPProxyItemRepository(ItemRepository):
@@ -28,14 +33,15 @@ class HTTPProxyItemRepository(ItemRepository):
     # print("JSON Response ", response.json())
 
 
-    def __init__(self, items_server_base_connection_url: str) -> None:
+    def __init__(self, items_server_base_connection_url: str, admin_auth_token: str) -> None:
         super().__init__()
-        self._base_url = items_server_base_connection_url # e.g. "http://item-service:8088/"
+        self._base_url = items_server_base_connection_url # e.g. "http://item-service:8088"
+        self._admin_auth_token = admin_auth_token # e.g. "eyJhbGciOiJIUzI1NiIs..."
 
     def get_items(self, item_ids: List[str]) -> List[Item]:
         collected_items : List[Item] = []
         for item_id in item_ids:
-            get_item_url = self._base_url + f"item/{item_id}" # e.g. "http://item-service:8088/" + "item/021309410341304fv9jsa0ivjcew"
+            get_item_url = self._base_url + f"/item/{item_id}" # e.g. "http://item-service:8088" + "/item/021309410341304fv9jsa0ivjcew"
             response = requests.get(get_item_url)
             print("[HTTPProxyItemRepository] sending HTTP GET request to items for item_id=",item_id)
             print(f"got status_code={response.status_code}")
@@ -87,7 +93,31 @@ class HTTPProxyItemRepository(ItemRepository):
 
     def add_items(self, items: List[Item]) -> None:
         """helper method for debugging"""
-        print("not saving item details because items gives me item details")
+        print("not saving item details because items-service gives me item details")
+
+    def mark_bought(self, item_ids: List[str]) -> bool:
+        # send post request to items to mark items bought
+        print(f"[HTTPProxyItemRepository] sending HTTP POST request to items-service (using an admin auth token) to mark {len(item_ids)} items bought.")
+        put_items_url = self._base_url + f"/item/checkout" # e.g. "http://item-service:8088" + "/item/checkout"
+        headers={
+            'Authorization': f'Bearer {self._admin_auth_token}',
+            'content-type':'application/json',
+        }
+        print("item_ids: ",item_ids)
+        response = requests.put(
+            put_items_url,
+            headers=headers,
+            data=json.dumps(item_ids)
+        )
+        print(f"got status_code={response.status_code}")
+        if response.status_code == 200:
+            print(f"[HTTPProxyItemRepository] success! item_ids={str([short_str(item_id) for item_id in item_ids])} marked bought.")
+            return True
+        else:
+            print(f"[HTTPProxyAuctionService] FAIL! response status: {response.status_code}")
+            return False
+        
+
 
 
 class InMemoryItemRepository(ItemRepository):
@@ -126,7 +156,9 @@ class InMemoryItemRepository(ItemRepository):
         #     "shipping_cost_cents" : ,
         # }
         return Item(data["item_id"],data["price_cents"],data["shipping_cost_cents"],data["start_time"] ,data["buy_now"],data["counterfeit"],data["inappropriate"])
-        
+
+    def mark_bought(self, item_ids: List[str]) -> bool:
+        pass        
 # class StubbedInMemoryItemRepository(ItemRepository):
 
 #     def __init__(self) -> None:
