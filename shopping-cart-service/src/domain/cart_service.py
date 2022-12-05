@@ -182,20 +182,20 @@ class CartService():
             # raise NotImplementedError("TO RETURN STATEMENT")
         else: # good to buy; 
             # but we have a problem: we need to cancel the auction associated with every item we are buying;
-            # this is sore point in the design: we make synchronous REST calls (irreversible) to cancel the auction of every associated
-            # item in the cart. If we fail to cancel the auction for just one item, we decide to not follow through with checkout.
-            # thus, some items may never get to the chance to be bought in auction: if N items are being bought, and 1 has a failed auctionCancel,
-            # then as many as N-1 items may have their auctions canceled. Interestingly, they can still be bought via bia now (so long as before
-            # auction start time), but they will not have an auction. 
+            # we make synchronous REST calls (irreversible) to cancel the auction of every associated
+            # item in the cart. However, because we already know all these items are being bought before auction start time, we know they all should succeed.
+            # Thus, if we fail to cancel the auction for any items, we continue to follow through with checkout (if the auctions are not canceled),
+            # then worst case scenario an auction occurs, a winner is declared, but shopping cart does not follow through with a transaction
+            # because it notices the item was already bought
             for item in his_items_purchased:
                 canceled = self._proxy_auction_service.stop_auction(item.item_id) # all should pass since they are just prior or at auction start
                 if canceled:
                     pass
-                    # print(f"[CartService] successfully instructed AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
+                    print(f"[CartService] successfully instructed AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
                 else :
                     print(f"[CartService] Fail. Oh no! did NOT successfully instruct AuctionService to cancel auction for item_ids = {utils.short_str(item.item_id)}")
-                    print(f"[CartService] aborting checkout.")
-                    return [],[],[],[],None
+                    print(f"[CartService] proceeding with checkout anyway.")
+                    pass
 
             # now, tell items-service to mark these items bought. This just helps update the state of items in the items-context for
             # query purposes (so that queries may filter by items bought). A better invocation of items-service would be asynch,
